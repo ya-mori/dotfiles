@@ -1,0 +1,150 @@
+# chezmoi dotfiles
+
+Claude Code と Codex CLI の設定を単一ソースから管理する chezmoi リポジトリ。
+
+コンセプト: 共通ルールを1箇所修正して chezmoi apply を実行するだけで、両ツールに設定が反映される。
+
+## ディレクトリ構成
+
+```
+~/.local/share/chezmoi/
+├── .chezmoidata/
+│   └── permissions.yaml          # Bash 許可コマンドの単一定義（33個）
+├── .chezmoitemplates/
+│   ├── instructions-core.md      # 共通ルール（両ツールに埋め込まれる）
+│   ├── instructions-claude.md    # Claude Code 専用ルール
+│   └── instructions-codex.md    # Codex CLI 専用ルール
+├── dot_claude/
+│   ├── CLAUDE.md.tmpl            # → ~/.claude/CLAUDE.md
+│   ├── settings.json.tmpl        # → ~/.claude/settings.json
+│   ├── agents/
+│   │   └── codex-implementer.md  # → ~/.claude/agents/
+│   ├── hooks/
+│   │   └── executable_log-event.sh  # → ~/.claude/hooks/
+│   └── skills/                   # → ~/.claude/skills/（7個）
+│       ├── ore-ai-review/        # Claude 専用（Codex には symlink しない）
+│       ├── ore-checkout/
+│       ├── ore-commit/
+│       ├── ore-message/
+│       ├── ore-plan-setup/
+│       ├── ore-push/
+│       └── ore-think/
+├── dot_codex/
+│   ├── AGENTS.md.tmpl            # → ~/.codex/AGENTS.md
+│   ├── rules/
+│   │   └── default.rules.tmpl   # → ~/.codex/rules/default.rules
+│   └── skills/                   # → ~/.codex/skills/（symlink、6個）
+│       └── symlink_*.tmpl        # dot_claude/skills/ へのシンボリックリンク
+└── README.md                     # このファイル（chezmoi 管理対象外）
+```
+
+## アーキテクチャ
+
+### テンプレートによる設定生成
+
+| ソース | 生成先 | 内容 |
+|--------|--------|------|
+| `.chezmoitemplates/instructions-core.md` | `~/.claude/CLAUDE.md` と `~/.codex/AGENTS.md` の両方 | 両ツール共通の行動ルール |
+| `.chezmoitemplates/instructions-claude.md` | `~/.claude/CLAUDE.md` のみ | Claude Code 専用設定 |
+| `.chezmoitemplates/instructions-codex.md` | `~/.codex/AGENTS.md` のみ | Codex CLI 専用設定 |
+
+### 許可コマンドの一元管理
+
+`.chezmoidata/permissions.yaml` に Bash 許可コマンド（33個）を単一定義し、`chezmoi apply` 時に以下の両方へ展開される:
+
+- `~/.claude/settings.json` の `Bash(xxx:*)` 許可リスト
+- `~/.codex/rules/default.rules` の `prefix_rule`
+
+### スキルの共有
+
+`dot_claude/skills/`（7個）が `~/.claude/skills/` の実体。
+`ore-ai-review` を除くポータブルな6個は `dot_codex/skills/symlink_*.tmpl` により `~/.codex/skills/` へシンボリックリンクされる。
+`ore-ai-review` は Claude のサブエージェント機構に依存するため Codex からは除外。
+
+## 日常の運用
+
+### 共通ルールを変更する
+
+```bash
+chezmoi edit ~/.claude/CLAUDE.md
+chezmoi apply
+```
+
+### 許可コマンドを追加する
+
+```bash
+# permissions.yaml に1行追加して適用（両ツールに同時反映）
+chezmoi edit ~/.local/share/chezmoi/.chezmoidata/permissions.yaml
+chezmoi apply
+```
+
+### スキルを追加する
+
+```bash
+# Claude にのみ追加する場合
+mkdir dot_claude/skills/<スキル名>
+
+# Codex にも共有する場合（symlink テンプレートも作成）
+touch dot_codex/skills/symlink_<スキル名>.tmpl
+```
+
+### ドリフト（アプリ側の書き換え）を検知・対処する
+
+```bash
+# 差分を確認
+chezmoi diff
+
+# ソース側に取り込む（アプリの変更を正とする場合）
+chezmoi re-add ~/.claude/CLAUDE.md
+
+# ソース優先で上書き（chezmoi の設定を正とする場合）
+chezmoi apply
+```
+
+注意: `~/.claude/CLAUDE.md` や `~/.codex/AGENTS.md` はテンプレートからの生成物のため、直接編集しないこと。次の `chezmoi apply` で上書きされる。
+
+## 秘匿情報の管理
+
+GitHub PAT は macOS Keychain に保存され、`chezmoi apply` 時にテンプレートへ注入される。リポジトリに平文は存在しない。
+
+| 項目 | 値 |
+|------|-----|
+| Keychain service | `github` |
+| Keychain account | ログインユーザー名（`$USER`） |
+| テンプレート参照 | `{{ keyring "github" .chezmoi.username }}` |
+
+### PAT のローテーション
+
+```bash
+# -w を値なしで実行するとプロンプトで安全に入力できる
+security add-generic-password -U -s github -a "$USER" -w
+chezmoi apply
+```
+
+## 新マシンでのセットアップ
+
+1. Keychain へ PAT を登録する（必須・事前に実施）:
+   ```bash
+   security add-generic-password -s github -a "$USER" -w
+   ```
+
+2. chezmoi をインストールして初期化する:
+   ```bash
+   brew install chezmoi
+   # リモートリポジトリが設定済みの場合
+   chezmoi init --apply <リポジトリURL>
+   # ローカルパスから初期化する場合
+   chezmoi init --apply /path/to/chezmoi-source
+   ```
+
+## 管理対象外のもの
+
+以下は chezmoi の管理対象に含めない:
+
+| パス | 理由 |
+|------|------|
+| `~/.codex/config.toml` | Codex が実行時に自己書き換えするため |
+| `~/.claude/history.jsonl` | ランタイム状態 |
+| `~/.claude/projects/` | ランタイム状態 |
+| `~/.claude/plugins/` | ランタイム状態 |
+| `README.md`（このファイル） | `.chezmoiignore` により管理対象外 |

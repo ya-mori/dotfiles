@@ -1,0 +1,136 @@
+{
+  "evals": [
+    {
+      "name": "single-feature-commit",
+      "prompt": "I've added a new user authentication feature with JWT tokens. The changes are in src/auth/login.py, src/auth/token.py, and src/auth/utils.py. Please create a commit for these changes.",
+      "expected_output": "A single commit with the message 'feat(auth): add user authentication' containing all three files",
+      "expectations": [
+        "Runs quality checks (lint, test) before committing",
+        "Groups changes logically",
+        "Displays quality check results (commands run and pass/fail status)",
+        "Presents commit content (message and file list) to user for review",
+        "Waits for user approval before creating commit",
+        "Creates a single commit with Conventional Commits format",
+        "Uses 'feat' type for new functionality",
+        "Includes all related files in one commit",
+        "Commit message is in English and one line",
+        "Verifies git status is clean after commit"
+      ]
+    },
+    {
+      "name": "multiple-logical-changes",
+      "prompt": "I made several changes: (1) added authentication in src/auth/, (2) fixed a bug in src/api/endpoints.py, (3) added tests in tests/test_auth.py, and (4) updated docs in docs/api.md. Please commit these changes.",
+      "expected_output": "Multiple commits, each for a logically separate change: feat(auth), fix(api), test(auth), docs(api)",
+      "expectations": [
+        "Runs quality checks before committing",
+        "Groups changes into logical commits",
+        "Displays quality check results (commands run and pass/fail status)",
+        "Presents all commit contents (message and file list) to user for review",
+        "Waits for user approval before creating commits",
+        "Creates separate commits for: feat, fix, test, docs",
+        "Each commit has correct Conventional Commits type",
+        "Commit messages are in English and one line each",
+        "Commits are in logical order (feat before test)",
+        "All changes are committed"
+      ]
+    },
+    {
+      "name": "bugfix-and-refactor-mixed",
+      "prompt": "I fixed a token expiration bug in src/auth/token.py and also refactored the utility functions in src/utils/helpers.py. Please commit these changes appropriately.",
+      "expected_output": "Two separate commits: 'fix(auth): fix token expiration handling' and 'refactor(utils): simplify helper functions'",
+      "expectations": [
+        "Runs quality checks before committing",
+        "Separates bugfix and refactor into different commits",
+        "Displays quality check results (commands run and pass/fail status)",
+        "Presents both commit contents to user for review",
+        "Waits for user approval before creating commits",
+        "First commit uses 'fix' type for bug fix",
+        "Second commit uses 'refactor' type for refactoring",
+        "Does not mix unrelated changes in same commit",
+        "Commit messages are in English and one line each"
+      ]
+    },
+    {
+      "name": "quality-check-failure-handling",
+      "prompt": "I made changes to src/api/endpoints.py. There's a linting error (unused import) and a failing test. Please create a commit.",
+      "expected_output": "Detects quality check failures, fixes the issues, re-runs checks, then creates the commit",
+      "expectations": [
+        "Runs quality checks (lint, test) before attempting to commit",
+        "Detects linting error (unused import)",
+        "Detects failing test",
+        "Fixes the linting error",
+        "Investigates and addresses the failing test",
+        "Re-runs quality checks after fixes",
+        "Displays quality check results showing all checks now pass",
+        "Presents commit content to user for review after fixes",
+        "Waits for user approval before creating commit",
+        "Only creates commit after all checks pass",
+        "Does not skip quality checks with --no-verify"
+      ]
+    },
+    {
+      "name": "lefthook-integration",
+      "prompt": "This project has lefthook configured with pre-commit hooks. I've made changes to src/auth/login.py. Please create a commit.",
+      "expected_output": "Creates a commit that successfully runs through lefthook pre-commit hooks",
+      "expectations": [
+        "Runs quality checks before committing",
+        "Displays quality check results (commands run and pass/fail status)",
+        "Presents commit content to user for review",
+        "Waits for user approval before creating commit",
+        "Creates commit with Conventional Commits format",
+        "Lefthook pre-commit hooks execute successfully",
+        "Does not use --no-verify to skip hooks",
+        "If hooks fail, fixes issues and retries (new commit, not --amend)",
+        "Verifies final git status is clean"
+      ]
+    },
+    {
+      "name": "subdirectory-targeted-commit",
+      "prompt": "/smart-commit src/auth - I've made changes in multiple directories but only want to commit changes in src/auth/",
+      "expected_output": "Commits only files in src/auth/ directory, ignoring changes in other directories",
+      "expectations": [
+        "Runs quality checks for the entire project",
+        "Only analyzes changes in src/auth/ directory",
+        "git status and git diff are scoped to src/auth/",
+        "Displays quality check results (commands run and pass/fail status)",
+        "Presents commit content to user for review",
+        "Waits for user approval before creating commit",
+        "Only commits files within src/auth/",
+        "Other directory changes remain uncommitted",
+        "Commit message reflects the scope (e.g., 'feat(auth): ...')"
+      ]
+    },
+    {
+      "name": "remove-debug-code-before-commit",
+      "prompt": "I've added a new feature in src/api/users.py but left some debug print statements and commented code. Please commit the changes.",
+      "expected_output": "Identifies and removes debug code/comments before creating the commit",
+      "expectations": [
+        "Runs quality checks",
+        "Identifies debug code (print statements, commented code)",
+        "Removes unnecessary debug code and comments",
+        "Displays quality check results (commands run and pass/fail status)",
+        "Presents commit content to user for review",
+        "Waits for user approval before creating commit",
+        "Creates clean commit without debug artifacts",
+        "Commit message follows Conventional Commits format",
+        "Code is production-ready"
+      ]
+    },
+    {
+      "name": "project-memory-update-consideration",
+      "prompt": "I fixed a tricky bug related to pytest-asyncio configuration that required adding 'asyncio_mode = auto' to pytest.ini. Please commit the changes and consider updating project memory.",
+      "expected_output": "Creates commit for the fix and considers adding the lesson to CLAUDE.md",
+      "expectations": [
+        "Runs quality checks",
+        "Displays quality check results (commands run and pass/fail status)",
+        "Presents commit content to user for review",
+        "Waits for user approval before creating commit",
+        "Creates commit for the bug fix",
+        "Recognizes this is valuable knowledge for future",
+        "Considers updating CLAUDE.md or project documentation",
+        "Documents the pytest-asyncio configuration requirement",
+        "Helps prevent the same issue in the future"
+      ]
+    }
+  ]
+}

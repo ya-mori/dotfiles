@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "GITHUB_PERSONAL_ACCESS_TOKEN": "{{ keyring "github" .chezmoi.username }}"
+  },
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "allow": [
+      {{- range $i, $cmd := .permissions.bash_allow }}
+      {{- if $i }},{{ end }}
+      "Bash({{ $cmd }}:*)"
+      {{- end }},
+      "Grep(*)",
+      "Glob(*)",
+      "List(*)",
+      "Search(*)",
+      "Read(*)",
+      "Read(/{{ .chezmoi.homeDir }}/.claude/templates/task-pdca-template.md)",
+      "Write(.ai_workspace/**)",
+      "Write({{ .chezmoi.homeDir }}/**/.ai_workspace/**)",
+      "Update(.ai_workspace/**)",
+      "Update({{ .chezmoi.homeDir }}/**/.ai_workspace/**)",
+      "mcp__plugin_serena_serena__activate_project",
+      "mcp__plugin_serena_serena__check_onboarding_performed",
+      "mcp__plugin_serena_serena__create_text_file",
+      "mcp__plugin_serena_serena__delete_memory",
+      "mcp__plugin_serena_serena__edit_memory",
+      "mcp__plugin_serena_serena__execute_shell_command",
+      "mcp__plugin_serena_serena__find_file",
+      "mcp__plugin_serena_serena__find_referencing_symbols",
+      "mcp__plugin_serena_serena__find_symbol",
+      "mcp__plugin_serena_serena__get_current_config",
+      "mcp__plugin_serena_serena__get_symbols_overview",
+      "mcp__plugin_serena_serena__initial_instructions",
+      "mcp__plugin_serena_serena__insert_after_symbol",
+      "mcp__plugin_serena_serena__insert_before_symbol",
+      "mcp__plugin_serena_serena__list_dir",
+      "mcp__plugin_serena_serena__list_memories",
+      "mcp__plugin_serena_serena__onboarding",
+      "mcp__plugin_serena_serena__prepare_for_new_conversation",
+      "mcp__plugin_serena_serena__read_file",
+      "mcp__plugin_serena_serena__read_memory",
+      "mcp__plugin_serena_serena__rename_memory",
+      "mcp__plugin_serena_serena__rename_symbol",
+      "mcp__plugin_serena_serena__replace_content",
+      "mcp__plugin_serena_serena__replace_symbol_body",
+      "mcp__plugin_serena_serena__search_for_pattern",
+      "mcp__plugin_serena_serena__switch_modes",
+      "mcp__plugin_serena_serena__write_memory",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "mcp__plugin_context7_context7__query-docs",
+      "Write({{ .chezmoi.homeDir }}/.claude/agents/**)",
+      "Write({{ .chezmoi.homeDir }}/.claude/CLAUDE.md)"
+    ],
+    "deny": [],
+    "ask": [
+      "Bash(git push:*)"
+    ],
+    "additionalDirectories": [
+      "{{ .chezmoi.homeDir }}/.ai_workspace/claude/session-logs"
+    ]
+  },
+  "model": "claude-fable-5[1m]",
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "osascript -e 'display notification \"Claude Codeが許可を求めています\" with title \"Claude Code\" subtitle \"確認待ち\" sound name \"Funk\"'"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "osascript -e 'display notification \"作業が完了しました。\" with title \"Claude Code\" sound name \"Glass\"'"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/log-event.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "ExitPlanMode",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "code \"$(ls -t ~/.claude/plans/*.md | head -1)\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "AskUserQuestion",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "osascript -e 'display notification \"Claude Codeが質問しています\" with title \"Claude Code\" subtitle \"確認を待機中\" sound name \"Funk\"'",
+            "timeout": 2
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "example-skills@anthropic-agent-skills": true,
+    "superpowers@claude-plugins-official": false,
+    "code-review@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
+    "figma@claude-plugins-official": true,
+    "skill-creator@claude-plugins-official": true,
+    "playwright@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "serena@claude-plugins-official": true,
+    "context7@claude-plugins-official": true
+  },
+  "language": "Japanese",
+  "tui": "fullscreen",
+  "skipAutoPermissionPrompt": true,
+  "voiceEnabled": true,
+  "feedbackSurveyState": {
+    "lastShownTime": 1754041344797
+  }
+}

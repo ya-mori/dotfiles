@@ -1,0 +1,3 @@
+{{ range .permissions.bash_allow -}}
+prefix_rule(pattern=[{{ range $i, $tok := (splitList " " .) }}{{ if $i }}, {{ end }}"{{ $tok }}"{{ end }}], decision="allow")
+{{ end -}}
