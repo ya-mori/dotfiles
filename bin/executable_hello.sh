@@ -6,5 +6,5 @@ echo 'おはようプロトコルを実行します'
 
 gcloud auth login --update-adc
 
-# sh ~/dev/bin/pod_check.sh
+# sh ~/bin/pod_check.sh
 

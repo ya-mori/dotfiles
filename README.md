@@ -42,11 +42,10 @@ Claude Code / Codex CLI の設定に加え、zsh・git・mise・自作スクリ�
 │   │   └── ignore                   # → ~/.config/git/ignore
 │   └── mise/
 │       └── config.toml              # → ~/.config/mise/config.toml
-├── dev/
-│   └── bin/
-│       ├── executable_gsopen.sh         # → ~/dev/bin/gsopen.sh
-│       ├── executable_hello.sh          # → ~/dev/bin/hello.sh
-│       └── executable_tmpdir.sh         # → ~/dev/bin/tmpdir.sh
+├── bin/
+│   ├── executable_gsopen.sh         # → ~/bin/gsopen.sh
+│   ├── executable_hello.sh          # → ~/bin/hello.sh
+│   └── executable_tmpdir.sh         # → ~/bin/tmpdir.sh
 └── README.md                     # このファイル（chezmoi 管理対象外）
 ```
 
@@ -176,6 +175,6 @@ chezmoi apply
 | `~/.claude/plugins/` | ランタイム状態 |
 | `README.md`（このファイル） | `.chezmoiignore` により管理対象外 |
 | `~/.zshenv.local` | シェル用の秘匿トークン置き場（平文をリポジトリに入れないため） |
-| `~/dev/bin/cloud-sql-proxy` | バイナリのため（brew 等で導入する） |
+| `~/bin/cloud-sql-proxy` | バイナリのため（brew 等で導入する） |
 | `~/.gitconfig` | ユーザー情報（メールアドレス）と Sourcetree の自動生成設定を含むため管理しない。共通 ignore は ~/.config/git/ignore で管理 |
 | `~/.zshrc.local` | ツール（Antigravity, Kiro 等）が自動追記するマシン固有設定の受け皿 |

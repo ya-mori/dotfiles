@@ -20,9 +20,9 @@ alias kc=kubectl
 alias gs=gsutil
 alias kctx=kubectx
 alias ll='ls -la'
-alias morning!='sh ~/dev/bin/hello.sh'
-alias gsopen='sh ~/dev/bin/gsopen.sh'
-alias tmpdir='sh ~/dev/bin/tmpdir.sh'
+alias morning!='sh ~/bin/hello.sh'
+alias gsopen='sh ~/bin/gsopen.sh'
+alias tmpdir='sh ~/bin/tmpdir.sh'
 
 
 # Command Setup
