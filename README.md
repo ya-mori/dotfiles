@@ -2,7 +2,7 @@
 
 Claude Code / Codex CLI の設定に加え、zsh・git・mise・自作スクリプトを管理する chezmoi リポジトリ。
 
-コンセプト: 共通ルールを1箇所修正して chezmoi apply を実行するだけで、両ツールに設定が反映される。
+コンセプト: ~/.ai_agent を単一の AI 共有ベースとし、Claude・Codex がこれを参照する対称構成。共通ルールを1箇所修正して chezmoi apply を実行するだけで、全ツールに設定が反映される。
 
 ## ディレクトリ構成
 
@@ -10,18 +10,10 @@ Claude Code / Codex CLI の設定に加え、zsh・git・mise・自作スクリ�
 ~/.local/share/chezmoi/
 ├── .chezmoidata/
 │   └── permissions.yaml          # Bash 許可コマンドの単一定義（33個）
-├── .chezmoitemplates/
-│   ├── instructions-core.md      # 共通ルール（両ツールに埋め込まれる）
-│   ├── instructions-claude.md    # Claude Code 専用ルール
-│   └── instructions-codex.md    # Codex CLI 専用ルール
-├── dot_claude/
-│   ├── CLAUDE.md.tmpl            # → ~/.claude/CLAUDE.md
-│   ├── settings.json.tmpl        # → ~/.claude/settings.json
-│   ├── agents/
-│   │   └── codex-implementer.md  # → ~/.claude/agents/
-│   ├── hooks/
-│   │   └── executable_log-event.sh  # → ~/.claude/hooks/
-│   └── skills/                   # → ~/.claude/skills/（7個）
+├── dot_ai_agent/
+│   ├── instructions/
+│   │   └── core.md               # 全ツール共通ルール（Claude・Codex 両方に埋め込まれる）
+│   └── skills/                   # スキル実体7個（→ ~/.ai_agent/skills/）
 │       ├── ore-ai-review/        # Claude 専用（Codex には symlink しない）
 │       ├── ore-checkout/
 │       ├── ore-commit/
@@ -29,12 +21,21 @@ Claude Code / Codex CLI の設定に加え、zsh・git・mise・自作スクリ�
 │       ├── ore-plan-setup/
 │       ├── ore-push/
 │       └── ore-think/
+├── dot_claude/
+│   ├── CLAUDE.md.tmpl            # → ~/.claude/CLAUDE.md（core.md include + Claude 固有内容）
+│   ├── settings.json.tmpl        # → ~/.claude/settings.json
+│   ├── agents/
+│   │   └── codex-implementer.md  # → ~/.claude/agents/
+│   ├── hooks/
+│   │   └── executable_log-event.sh  # → ~/.claude/hooks/
+│   └── skills/                   # → ~/.claude/skills/（7個すべて symlink）
+│       └── symlink_ore-*.tmpl    # ~/.ai_agent/skills/ へのシンボリックリンク
 ├── dot_codex/
-│   ├── AGENTS.md.tmpl            # → ~/.codex/AGENTS.md
+│   ├── AGENTS.md.tmpl            # → ~/.codex/AGENTS.md（core.md include + Codex 固有内容）
 │   ├── rules/
 │   │   └── default.rules.tmpl   # → ~/.codex/rules/default.rules
 │   └── skills/                   # → ~/.codex/skills/（symlink、6個）
-│       └── symlink_*.tmpl        # dot_claude/skills/ へのシンボリックリンク
+│       └── symlink_*.tmpl        # ~/.ai_agent/skills/ へのシンボリックリンク
 ├── dot_zshrc                         # → ~/.zshrc
 ├── dot_zprofile                      # → ~/.zprofile
 ├── dot_config/
@@ -55,9 +56,9 @@ Claude Code / Codex CLI の設定に加え、zsh・git・mise・自作スクリ�
 
 | ソース | 生成先 | 内容 |
 |--------|--------|------|
-| `.chezmoitemplates/instructions-core.md` | `~/.claude/CLAUDE.md` と `~/.codex/AGENTS.md` の両方 | 両ツール共通の行動ルール |
-| `.chezmoitemplates/instructions-claude.md` | `~/.claude/CLAUDE.md` のみ | Claude Code 専用設定 |
-| `.chezmoitemplates/instructions-codex.md` | `~/.codex/AGENTS.md` のみ | Codex CLI 専用設定 |
+| `dot_ai_agent/instructions/core.md` | `~/.claude/CLAUDE.md` と `~/.codex/AGENTS.md` の両方 | 両ツール共通の行動ルール |
+| `dot_claude/CLAUDE.md.tmpl`（インライン部分） | `~/.claude/CLAUDE.md` のみ | Claude Code 専用設定 |
+| `dot_codex/AGENTS.md.tmpl`（インライン部分） | `~/.codex/AGENTS.md` のみ | Codex CLI 専用設定 |
 
 ### 許可コマンドの一元管理
 
@@ -68,8 +69,7 @@ Claude Code / Codex CLI の設定に加え、zsh・git・mise・自作スクリ�
 
 ### スキルの共有
 
-`dot_claude/skills/`（7個）が `~/.claude/skills/` の実体。
-`ore-ai-review` を除くポータブルな6個は `dot_codex/skills/symlink_*.tmpl` により `~/.codex/skills/` へシンボリックリンクされる。
+実体は `dot_ai_agent/skills/`（7個）で `~/.ai_agent/skills/` に展開される。Claude・Codex とも `symlink_*.tmpl` により `~/.ai_agent/skills/` を参照する対称構成。
 `ore-ai-review` は Claude のサブエージェント機構に依存するため Codex からは除外。
 
 ## 日常の運用
@@ -92,11 +92,16 @@ chezmoi apply
 ### スキルを追加する
 
 ```bash
-# Claude にのみ追加する場合
-mkdir dot_claude/skills/<スキル名>
+# 実体を dot_ai_agent/skills に作成
+mkdir dot_ai_agent/skills/<スキル名>
 
-# Codex にも共有する場合（symlink テンプレートも作成）
-touch dot_codex/skills/symlink_<スキル名>.tmpl
+# Claude に追加する場合（symlink テンプレートを作成）
+printf '{{ .chezmoi.homeDir }}/.ai_agent/skills/<スキル名>\n' > dot_claude/skills/symlink_<スキル名>.tmpl
+
+# Codex にも共有する場合（Codex 用 symlink テンプレートも作成）
+printf '{{ .chezmoi.homeDir }}/.ai_agent/skills/<スキル名>\n' > dot_codex/skills/symlink_<スキル名>.tmpl
+
+chezmoi apply
 ```
 
 ### ドリフト（アプリ側の書き換え）を検知・対処する

@@ -1,5 +1,12 @@
 # AGENTS.md
 
-{{ template "instructions-core.md" . }}
+{{ include "dot_ai_agent/instructions/core.md" }}
 
-{{ template "instructions-codex.md" . }}
+## Codex 固有ガイドライン
+
+- **このファイルは chezmoi により生成されている。直接編集せず `~/.local/share/chezmoi` のソースを編集して `chezmoi apply` すること**
+
+- **タスクは自身で直接実装すること**
+  - Codex はサブエージェント機構を持たないため、実装依頼を受けた場合は自身のコーディング能力で直接実行する
+  - サブエージェントへの委譲は行わない
+
