@@ -1,0 +1,5 @@
+[tools]
+go = "1.23"
+node = "24"
+pre-commit = "4.4.0"
+python = "3.12"
