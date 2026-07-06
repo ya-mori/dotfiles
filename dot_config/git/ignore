@@ -1,0 +1,8 @@
+.DS_Store
+.vscode
+.idea
+.cursor_workspace
+cursor_workspace
+.ai_workspace
+.serena
+**/.claude/settings.local.json
