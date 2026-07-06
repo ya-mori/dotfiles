@@ -1,0 +1,37 @@
+# Default
+export PATH=$PATH:$HOME/.local/bin
+
+
+# App Env
+
+export ENV=loc
+export VERTEX_ENV=loc
+export SERVICE_ENV=loc
+
+
+# Dev Env
+export GOOGLE_APPLICATION_CREDENTIALS="$HOME/.config/gcloud/application_default_credentials.json"
+[ -f "$HOME/.zshenv.local" ] && source "$HOME/.zshenv.local"
+
+
+# Command Alias
+
+alias kc=kubectl
+alias gs=gsutil
+alias kctx=kubectx
+alias ll='ls -la'
+alias morning!='sh ~/dev/bin/hello.sh'
+alias gsopen='sh ~/dev/bin/gsopen.sh'
+alias tmpdir='sh ~/dev/bin/tmpdir.sh'
+
+
+# Command Setup
+
+## mise
+[ -x "$HOME/.local/bin/mise" ] && eval "$($HOME/.local/bin/mise activate zsh)"
+
+## direnv
+command -v direnv >/dev/null && eval "$(direnv hook zsh)"
+
+# マシン固有・ツール自動追記分は管理外ファイルへ
+[ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
