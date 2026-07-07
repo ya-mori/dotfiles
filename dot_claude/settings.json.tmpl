@@ -11,26 +11,21 @@
       {{- if $i }},{{ end }}
       "Bash({{ $cmd }}:*)"
       {{- end }},
-      "Grep(*)",
-      "Glob(*)",
-      "List(*)",
-      "Search(*)",
-      "Read(*)",
-      "Read(/{{ .chezmoi.homeDir }}/.claude/templates/task-pdca-template.md)",
       "Write(.ai_workspace/**)",
       "Write({{ .chezmoi.homeDir }}/**/.ai_workspace/**)",
-      "Update(.ai_workspace/**)",
-      "Update({{ .chezmoi.homeDir }}/**/.ai_workspace/**)",
+      "Edit(.ai_workspace/**)",
+      "Edit({{ .chezmoi.homeDir }}/**/.ai_workspace/**)",
       "mcp__plugin_serena_serena__activate_project",
-      "mcp__plugin_serena_serena__check_onboarding_performed",
       "mcp__plugin_serena_serena__create_text_file",
       "mcp__plugin_serena_serena__delete_memory",
       "mcp__plugin_serena_serena__edit_memory",
-      "mcp__plugin_serena_serena__execute_shell_command",
+      "mcp__plugin_serena_serena__find_declaration",
       "mcp__plugin_serena_serena__find_file",
+      "mcp__plugin_serena_serena__find_implementations",
       "mcp__plugin_serena_serena__find_referencing_symbols",
       "mcp__plugin_serena_serena__find_symbol",
       "mcp__plugin_serena_serena__get_current_config",
+      "mcp__plugin_serena_serena__get_diagnostics_for_file",
       "mcp__plugin_serena_serena__get_symbols_overview",
       "mcp__plugin_serena_serena__initial_instructions",
       "mcp__plugin_serena_serena__insert_after_symbol",
@@ -38,22 +33,24 @@
       "mcp__plugin_serena_serena__list_dir",
       "mcp__plugin_serena_serena__list_memories",
       "mcp__plugin_serena_serena__onboarding",
-      "mcp__plugin_serena_serena__prepare_for_new_conversation",
       "mcp__plugin_serena_serena__read_file",
       "mcp__plugin_serena_serena__read_memory",
       "mcp__plugin_serena_serena__rename_memory",
       "mcp__plugin_serena_serena__rename_symbol",
       "mcp__plugin_serena_serena__replace_content",
+      "mcp__plugin_serena_serena__replace_in_files",
       "mcp__plugin_serena_serena__replace_symbol_body",
+      "mcp__plugin_serena_serena__safe_delete_symbol",
       "mcp__plugin_serena_serena__search_for_pattern",
-      "mcp__plugin_serena_serena__switch_modes",
       "mcp__plugin_serena_serena__write_memory",
       "mcp__plugin_context7_context7__resolve-library-id",
       "mcp__plugin_context7_context7__query-docs",
       "Write({{ .chezmoi.homeDir }}/.claude/agents/**)",
       "Write({{ .chezmoi.homeDir }}/.claude/CLAUDE.md)"
     ],
-    "deny": [],
+    "deny": [
+      "Read(~/.zshenv.local)"
+    ],
     "ask": [
       "Bash(git push:*)"
     ],
@@ -136,8 +133,5 @@
   "language": "Japanese",
   "tui": "fullscreen",
   "skipAutoPermissionPrompt": true,
-  "voiceEnabled": true,
-  "feedbackSurveyState": {
-    "lastShownTime": 1754041344797
-  }
+  "voiceEnabled": true
 }
