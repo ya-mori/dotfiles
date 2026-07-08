@@ -1,5 +1,5 @@
 # Default
-export PATH=$PATH:$HOME/.local/bin
+export PATH=$PATH:$HOME/.local/bin:$HOME/bin
 
 
 # App Env
@@ -9,20 +9,15 @@ export VERTEX_ENV=loc
 export SERVICE_ENV=loc
 
 
-# Dev Env
-export GOOGLE_APPLICATION_CREDENTIALS="$HOME/.config/gcloud/application_default_credentials.json"
-[ -f "$HOME/.zshenv.local" ] && source "$HOME/.zshenv.local"
-
-
 # Command Alias
 
 alias kc=kubectl
 alias gs=gsutil
 alias kctx=kubectx
 alias ll='ls -la'
-alias morning!='sh ~/bin/hello.sh'
-alias gsopen='sh ~/bin/gsopen.sh'
-alias tmpdir='sh ~/bin/tmpdir.sh'
+alias morning!='hello.sh'
+alias gsopen='gsopen.sh'
+alias tmpdir='tmpdir.sh'
 
 
 # Command Setup
