@@ -1,88 +1,65 @@
 #!/bin/bash
 # PostToolUse hook: インクリメンタルイベントロガー（LLMなし）
-if [ -n "$LOG_EVENT_HOOK_RUNNING" ]; then exit 0; fi
-export LOG_EVENT_HOOK_RUNNING=1
-
-INPUT=$(cat)
-
-SESSION_ID=$(echo "$INPUT" | python3 -c "
-import sys, json
-d = json.load(sys.stdin)
-sid = d.get('session_id', 'unknown')
-print(sid[:8])
-" 2>/dev/null)
-
-TOOL_NAME=$(echo "$INPUT" | python3 -c "
-import sys, json
-d = json.load(sys.stdin)
-print(d.get('tool_name', ''))
-" 2>/dev/null)
-
-TIMESTAMP=$(date '+%H:%M:%S')
-DATE=$(date '+%Y-%m-%d')
 LOG_DIR="$HOME/.ai_workspace/claude/session-logs"
 mkdir -p "$LOG_DIR"
-LOG_FILE="$LOG_DIR/$(date +%Y%m%d)-${SESSION_ID}.md"
 
-# ファイルが新規なら日付ヘッダーを書く
-if [ ! -f "$LOG_FILE" ]; then
-  echo "# セッション: ${DATE} (${SESSION_ID})" > "$LOG_FILE"
-  echo "" >> "$LOG_FILE"
-fi
+python3 - "$LOG_DIR" <<'PYEOF'
+import glob
+import json
+import os
+import sys
+import time
 
-case "$TOOL_NAME" in
-  Bash)
-    CMD=$(echo "$INPUT" | python3 -c "
-import sys, json
-d = json.load(sys.stdin)
-cmd = d.get('tool_input', {}).get('command', '')
-print(cmd.split('\n')[0][:120])
-" 2>/dev/null)
-    [ -n "$CMD" ] && echo "- ${TIMESTAMP} [Bash] \`${CMD}\`" >> "$LOG_FILE"
-    ;;
-  Write)
-    FILE=$(echo "$INPUT" | python3 -c "
-import sys, json
-d = json.load(sys.stdin)
-print(d.get('tool_input', {}).get('file_path', ''))
-" 2>/dev/null)
-    [ -n "$FILE" ] && echo "- ${TIMESTAMP} [Write] ${FILE}" >> "$LOG_FILE"
-    ;;
-  Edit)
-    FILE=$(echo "$INPUT" | python3 -c "
-import sys, json
-d = json.load(sys.stdin)
-print(d.get('tool_input', {}).get('file_path', ''))
-" 2>/dev/null)
-    [ -n "$FILE" ] && echo "- ${TIMESTAMP} [Edit] ${FILE}" >> "$LOG_FILE"
-    ;;
-  TaskCreate)
-    TITLE=$(echo "$INPUT" | python3 -c "
-import sys, json
-d = json.load(sys.stdin)
-print(d.get('tool_input', {}).get('title', ''))
-" 2>/dev/null)
-    if [ -n "$TITLE" ]; then
-      printf "\n## Task: \"%s\" [started: %s]\n" "$TITLE" "$TIMESTAMP" >> "$LOG_FILE"
-    fi
-    ;;
-  TaskUpdate)
-    STATUS=$(echo "$INPUT" | python3 -c "
-import sys, json
-d = json.load(sys.stdin)
-print(d.get('tool_input', {}).get('status', ''))
-" 2>/dev/null)
-    if [[ "$STATUS" == "completed" || "$STATUS" == "failed" ]]; then
-      TITLE=$(echo "$INPUT" | python3 -c "
-import sys, json
-d = json.load(sys.stdin)
-r = d.get('tool_response') or {}
-title = r.get('title') or d.get('tool_input', {}).get('id', '')
-print(title)
-" 2>/dev/null)
-      printf "- %s [Task:%s] %s\n\n---\n\n" "$TIMESTAMP" "$STATUS" "$TITLE" >> "$LOG_FILE"
-    fi
-    ;;
-esac
+log_dir = sys.argv[1]
+try:
+    d = json.load(sys.stdin)
+except Exception:
+    sys.exit(0)
 
+sid = (d.get("session_id") or "unknown")[:8]
+tool = d.get("tool_name") or ""
+ti = d.get("tool_input") or {}
+ts = time.strftime("%H:%M:%S")
+date = time.strftime("%Y-%m-%d")
+path = os.path.join(log_dir, f"{time.strftime('%Y%m%d')}-{sid}.md")
+
+line = None
+if tool == "Bash":
+    cmd = (ti.get("command") or "").split("\n")[0][:120]
+    if cmd:
+        line = f"- {ts} [Bash] `{cmd}`\n"
+elif tool in ("Write", "Edit"):
+    file = ti.get("file_path") or ""
+    if file:
+        line = f"- {ts} [{tool}] {file}\n"
+elif tool == "TaskCreate":
+    title = ti.get("title") or ""
+    if title:
+        line = f'\n## Task: "{title}" [started: {ts}]\n'
+elif tool == "TaskUpdate":
+    status = ti.get("status") or ""
+    if status in ("completed", "failed"):
+        r = d.get("tool_response") or {}
+        title = (r.get("title") if isinstance(r, dict) else None) or ti.get("id") or ""
+        line = f"- {ts} [Task:{status}] {title}\n\n---\n\n"
+
+if line is None:
+    sys.exit(0)
+
+is_new = not os.path.exists(path)
+with open(path, "a") as fp:
+    if is_new:
+        fp.write(f"# セッション: {date} ({sid})\n\n")
+    fp.write(line)
+
+# 新規セッションの開始時に 30 日より古いログを削除する
+if is_new:
+    cutoff = time.time() - 30 * 86400
+    for old in glob.glob(os.path.join(log_dir, "*.md")):
+        try:
+            if os.path.getmtime(old) < cutoff:
+                os.remove(old)
+        except OSError:
+            pass
+PYEOF
 exit 0
