@@ -1,27 +1,29 @@
 permissions:
   bash_allow:
+    # 読み取り・移動系（リダイレクト等で書き込みに転用できるものは許可しない）
     - "cd"
     - "ls"
     - "cat"
-    - "find"
     - "grep"
-    - "awk"
-    - "sed"
     - "head"
     - "tail"
     - "wc"
     - "sort"
-    - "echo"
     - "which"
     - "pwd"
     - "rg"
     - "make"
     - "mkdir"
-    - "cp"
-    - "chmod"
+    # git 読み取り系
+    - "git status"
+    - "git diff"
+    - "git log"
+    - "git show"
+    # テスト・静的解析
     - "uv run pytest"
     - "uv run mypy"
     - "uv run ruff"
+    # GCP / k8s 読み取り系
     - "bq show"
     - "kubectl get"
     - "kubectl describe"
@@ -32,4 +34,6 @@ permissions:
     - "kubectl cluster-info"
     - "kubectl api-resources"
     - "kubectl api-versions"
-    - "kubectl config"
+    - "kubectl config get-contexts"
+    - "kubectl config current-context"
+    - "kubectl config view"

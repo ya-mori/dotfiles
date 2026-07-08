@@ -44,9 +44,7 @@
       "mcp__plugin_serena_serena__search_for_pattern",
       "mcp__plugin_serena_serena__write_memory",
       "mcp__plugin_context7_context7__resolve-library-id",
-      "mcp__plugin_context7_context7__query-docs",
-      "Write({{ .chezmoi.homeDir }}/.claude/agents/**)",
-      "Write({{ .chezmoi.homeDir }}/.claude/CLAUDE.md)"
+      "mcp__plugin_context7_context7__query-docs"
     ],
     "deny": [
       "Read(~/.zshenv.local)"
@@ -100,7 +98,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "code \"$(ls -t ~/.claude/plans/*.md | head -1)\"",
+            "command": "p=$(ls -t ~/.claude/plans/*.md 2>/dev/null | head -1); [ -n \"$p\" ] && code \"$p\"; exit 0",
             "timeout": 5
           }
         ]
