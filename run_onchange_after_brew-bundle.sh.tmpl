@@ -1,0 +1,8 @@
+#!/bin/bash
+# Brewfile の内容が変わったときだけ chezmoi apply 時に実行される
+# （このスクリプトに Brewfile 全文を埋め込むことで変更検知している）
+set -eu
+
+brew bundle --file=/dev/stdin <<'BREWFILE'
+{{ include "Brewfile" -}}
+BREWFILE
