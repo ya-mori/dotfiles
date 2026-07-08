@@ -36,7 +36,7 @@ codex --ask-for-approval never --sandbox workspace-write "{仕様プロンプト
 
 - `--ask-for-approval never`: 承認プロンプトなし（非インタラクティブ）
 - `--sandbox workspace-write`: 書き込みを作業ディレクトリ内に限定（公式CI/CD推奨構成）
-- タイムアウトは 300 秒（5分）を目安とする
+- **Bash ツールの `timeout` パラメータに `300000`（5分）を明示的に指定すること**（デフォルトは 120 秒で、指定しないと実装途中で打ち切られる）
 - Codex の出力はそのまま保持する
 
 ### Phase 3: 結果報告
