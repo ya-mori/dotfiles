@@ -129,12 +129,15 @@ chezmoi apply
 
 ## 秘匿情報の管理
 
-GitHub PAT は **macOS Keychain を唯一のソース**とし、2経路で注入される。リポジトリに平文は存在しない。
+GitHub の認証は用途ごとに分離し、シェルには一切 export しない（環境変数としての露出を避ける）。
 
-| 経路 | 仕組み |
-|------|--------|
-| `~/.claude/settings.json` | `chezmoi apply` 時に `{{ keyring "github" .chezmoi.username }}` で埋め込み |
-| シェル環境変数 | `~/.zshenv` がシェル起動時に `security find-generic-password` で取得 |
+| 用途 | 認証の担い手 | 備考 |
+|------|-------------|------|
+| git 操作（push/pull 等） | osxkeychain credential helper | `git config --global credential.helper osxkeychain` |
+| `gh` CLI | gh 自身の認証（`gh auth login`） | gh 専用の keyring にトークンを保持 |
+| Claude Code（GitHub 連携） | `~/.claude/settings.json` の env | `chezmoi apply` 時に `{{ keyring "github" .chezmoi.username }}` で PAT を注入 |
+
+Claude Code 用の PAT のみ macOS Keychain に保持する:
 
 | 項目 | 値 |
 |------|-----|
@@ -146,7 +149,7 @@ GitHub PAT は **macOS Keychain を唯一のソース**とし、2経路で注入
 ```bash
 # -w を値なしで実行するとプロンプトで安全に入力できる
 security add-generic-password -U -s github -a "$USER" -w
-chezmoi apply   # settings.json を再生成（シェルは次回起動時に自動反映）
+chezmoi apply   # settings.json を再生成
 ```
 
 注意: 生成後の `~/.claude/settings.json` には PAT が平文で含まれる（Claude Code の制約上不可避）。リポジトリと Keychain 以外にトークンを増やさないこと。

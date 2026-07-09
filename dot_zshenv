@@ -1,7 +1,10 @@
 # すべての zsh（非対話・GUI 起動含む）で読まれる環境設定
-
-# 秘匿トークンは macOS Keychain を単一ソースとして注入する
-export GITHUB_PERSONAL_ACCESS_TOKEN="$(security find-generic-password -s github -a "$USER" -w 2>/dev/null)"
+#
+# GitHub PAT はシェルには export しない。
+#   - git 操作: osxkeychain credential helper が担う
+#   - gh CLI: gh 自身の認証（gh auth login）が担う
+#   - Claude Code: ~/.claude/settings.json に Keychain から注入（keyring テンプレート）
+# トークンを環境変数として全プロセスに晒さないことで露出面を減らす。
 
 # マシン固有の追加シークレットは管理外ファイルへ
 [ -f "$HOME/.zshenv.local" ] && source "$HOME/.zshenv.local"
