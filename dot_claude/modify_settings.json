@@ -1,0 +1,14 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- /* Claude Code が実行時に書き込むトップレベルキー（model など）はターゲット側の値を保持し、
+       テンプレートで管理しているキーはソースを正とする */ -}}
+{{- $managed := includeTemplate "claude/settings.json" . | fromJson -}}
+{{- $current := dict -}}
+{{- if and (hasKey .chezmoi "stdin") .chezmoi.stdin -}}
+{{-   $current = .chezmoi.stdin | fromJson -}}
+{{- end -}}
+{{- range $key, $value := $current -}}
+{{-   if not (hasKey $managed $key) -}}
+{{-     $_ := set $managed $key $value -}}
+{{-   end -}}
+{{- end -}}
+{{- toPrettyJson $managed }}
