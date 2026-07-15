@@ -11,4 +11,10 @@
 {{-     $_ := set $managed $key $value -}}
 {{-   end -}}
 {{- end -}}
-{{- toPrettyJson $managed }}
+{{- /* 値が同一なら並び順・改行の差を diff に出さないため、ターゲットをそのまま通す */ -}}
+{{- $desired := toPrettyJson $managed -}}
+{{- if eq $desired (toPrettyJson $current) -}}
+{{- .chezmoi.stdin -}}
+{{- else -}}
+{{- $desired }}
+{{- end -}}
