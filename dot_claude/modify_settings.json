@@ -11,6 +11,14 @@
 {{-     $_ := set $managed $key $value -}}
 {{-   end -}}
 {{- end -}}
+{{- /* enabledPlugins はディープマージ: ターゲットのみのエントリ（マシンローカルなプラグイン）を保持する */ -}}
+{{- if and (hasKey $current "enabledPlugins") (hasKey $managed "enabledPlugins") -}}
+{{-   range $plugin, $enabled := (get $current "enabledPlugins") -}}
+{{-     if not (hasKey (get $managed "enabledPlugins") $plugin) -}}
+{{-       $_ := set (get $managed "enabledPlugins") $plugin $enabled -}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
 {{- /* 値が同一なら並び順・改行の差を diff に出さないため、ターゲットをそのまま通す */ -}}
 {{- $desired := toPrettyJson $managed -}}
 {{- if eq $desired (toPrettyJson $current) -}}
