@@ -18,6 +18,15 @@
   - タスクに切るほどでもない一時ファイル（ちょっとした検証、スニペット等）は、プロジェクトルート直下の `.ai_workspace/claude/tmp/{yyyymmdd-HHMMSS}/` ディレクトリを作成して配置すること
   - `/tmp` やその他の作業ディレクトリ外への書き出しは禁止。作業ディレクトリ内に閉じること
 
+## Production Operation Guidelines
+
+- **本番環境（prd）への操作は、必ず実行前に plan を提示して承認を得る**
+  - 対象操作: ワークフロー/ジョブの submit・terminate・resume、Cloud Run のトラフィック変更・デプロイ、本番テーブルへの INSERT/UPDATE/DELETE、その他本番の状態を変える操作すべて
+  - plan には「何を・どの順で・何に影響するか」を明記し、`y/n` で承認を取ってから実行する
+  - **一連の作業の流れで自明に見えても、勝手に submit・実行しない**。包括的な承認（「進めて」等）があっても、個々の本番操作の直前に都度 plan を見せて確認する
+  - 既に同じ処理が実行中でないか（重複実行にならないか）を submit 前に必ず確認する
+- **読み取り専用の操作（SELECT、describe、logging read、workflow の get/list 等）は承認不要**
+
 ## Branch & PR Guidelines
 
 - **1ブランチ = 1PR** — 1つのブランチには PR を1つしか作成しない
