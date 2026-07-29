@@ -11,8 +11,6 @@
       {{- if $i }},{{ end }}
       "Bash({{ $cmd }}:*)"
       {{- end }},
-      "Write(.ai_workspace/**)",
-      "Write({{ .chezmoi.homeDir }}/**/.ai_workspace/**)",
       "Edit(.ai_workspace/**)",
       "Edit({{ .chezmoi.homeDir }}/**/.ai_workspace/**)",
       "mcp__plugin_serena_serena__activate_project",
