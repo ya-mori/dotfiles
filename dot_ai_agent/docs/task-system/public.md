@@ -4,7 +4,7 @@ Notion 上の個人タスクを AI エージェント（Claude Code / Codex）�
 **使いながら育てる。** 決まっていないことは §6 にまとめてある。
 
 > このファイルには識別子・固有名詞を書かない。
-> 実際の DB id・命名・実例は同名の `docs/private/task-system.md` にある。
+> 実際の DB id・命名・実例は同じディレクトリの `docs/task-system/private.md` にある。
 > **操作前に private 側を必ず併せて読むこと**（読み取り規約は `instructions/core.md` を参照）。
 
 ---

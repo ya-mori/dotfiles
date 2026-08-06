@@ -14,12 +14,13 @@ Claude Code / Codex CLI の設定に加え、zsh・git・mise・自作スクリ�
 │   └── claude/settings.json      # settings.json 本体（modify_settings.json から参照される）
 ├── .chezmoiscripts/
 │   └── run_onchange_*.sh.tmpl    # apply 時に実行（ホームには展開しない）
-├── .chezmoiignore                # chezmoi の展開対象外（README・Brewfile・private/）
-├── .gitignore                    # git 管理対象外（private/）
+├── .chezmoiignore                # chezmoi の展開対象外（README・Brewfile）
+├── .gitignore                    # git 管理対象外（private* ／ private_ 属性は除く）
 ├── dot_ai_agent/
-│   ├── docs/
-│   │   └── public/               # → ~/.ai_agent/docs/public/（Claude・Codex 共通の参照ドキュメント）
-│   │       └── *.md              # 秘匿部分は同名で private/ へ分離（「公開方針」参照）
+│   ├── docs/                     # → ~/.ai_agent/docs/（Claude・Codex 共通の参照ドキュメント）
+│   │   └── <topic>/              # トピックごとに1ディレクトリ
+│   │       ├── public.md         # 仕組み・ルール本体
+│   │       └── private.md        # 秘匿部分の差分（git 追跡なし・「公開方針」参照）
 │   ├── instructions/
 │   │   └── core.md               # 全ツール共通ルール（Claude・Codex 両方に埋め込まれる）
 │   └── skills/                   # スキル実体（→ ~/.ai_agent/skills/）
@@ -164,30 +165,33 @@ chezmoi apply
 | 層 | 中身 | 置き場 | git |
 |---|------|--------|-----|
 | **L1: 公開可** | 仕組み・ルール・構造。汎用的な知恵 | このリポジトリ | ✅ 管理する |
-| **L2: 秘匿** | 識別子・社内固有名詞・実名・社内制度・業務実例 | `private/` ディレクトリ（**chezmoi は管理する**） | ❌ 追跡しない |
+| **L2: 秘匿** | 識別子・社内固有名詞・実名・社内制度・業務実例 | `private.md`（**chezmoi は管理する**） | ❌ 追跡しない |
 | **L3: 認証情報** | PAT・API キー | macOS Keychain / `*.local` ファイル | ❌ 置かない |
 
 L3 の詳細は次節「秘匿情報の管理」を参照。
 
-### public / private 同名ペア規約
+### public / private ペア規約
 
-L2 を切り出すときは、**public 側と同じファイル名**で `private/` に置く。
+L2 を切り出すときは、**public.md と同じディレクトリ**に `private.md` として置く。
 
 ```
 ~/.ai_agent/docs/
-├── public/task-system.md    # 仕組み・ルール本体（このリポジトリで管理）
-└── private/task-system.md   # 識別子・実例だけの差分（chezmoi 管理・git 追跡なし）
+└── task-system/
+    ├── public.md     # 仕組み・ルール本体（このリポジトリで管理）
+    └── private.md    # 識別子・実例だけの差分（chezmoi 管理・git 追跡なし）
 ```
 
-**private も chezmoi のソースに置く。** `dot_ai_agent/docs/private/` に実体があり、`chezmoi apply` で
-`~/.ai_agent/docs/private/` へ展開される。`.gitignore` によって git だけが追跡しない状態になっている。
+トピック単位でまとまるため、public を読んだ時点で private の有無が同じディレクトリ内で分かる。
+
+**private も chezmoi のソースに置く。** `dot_ai_agent/docs/<topic>/private.md` に実体があり、`chezmoi apply` で
+`~/.ai_agent/docs/<topic>/private.md` へ展開される。`.gitignore` によって git だけが追跡しない状態になっている。
 `chezmoi edit` で public 側と同じ操作で編集でき、置き場が分散しない。
 
 > **履歴は残らない。** git 管理外のため、うっかり上書きしても戻せない。
 > 実体はソースとターゲットの2箇所にあるので片方からは復旧できるが、変更履歴は追えない。
 
 - **private 側は本文を複製しない。** 秘匿部分の差分だけを持つ
-- AI エージェントは `public/X.md` を読んだら `private/X.md` の有無を確認し、あれば併せて読む（規約は `dot_ai_agent/instructions/core.md` の Document Reference Guidelines に定義）
+- AI エージェントは `<topic>/public.md` を読んだら同ディレクトリの `private.md` の有無を確認し、あれば併せて読む（規約は `dot_ai_agent/instructions/core.md` の Document Reference Guidelines に定義）
 - **private が無い環境でも public 側だけで動作すること。** 新マシンや他人の環境で壊れないようにする
 - 記述が競合する場合は private 側を優先する
 
@@ -195,15 +199,23 @@ L2 を切り出すときは、**public 側と同じファイル名**で `private
 
 | 仕組み | ファイル | 効果 |
 |--------|---------|------|
-| git 除外 | `.gitignore` の `**/private/` | 階層を問わず private/ をコミットさせない |
+| git 除外 | `.gitignore` の `**/private*` | 階層を問わず、private で始まるファイル・ディレクトリをコミットさせない |
+| 例外の復帰 | `.gitignore` の `!**/private_*` | chezmoi の `private_` 属性 prefix を追跡対象に戻す |
 
-> ⚠️ **安全網はこの1本しかない。** `private/` は chezmoi の管理対象なので、
-> `.gitignore` のこの行を消すと秘匿情報が即座に git に入る。編集時は注意すること。
+`private*` としているのは `private.md` だけでなく `private-notes.md` のような派生名も拾うため。
+命名を厳密に守れなくても秘匿側に倒れる。
+
+> ⚠️ **安全網はこの1本しかない。** `private.md` は chezmoi の管理対象なので、
+> `.gitignore` の `**/private*` を消すと秘匿情報が即座に git に入る。編集時は注意すること。
 >
 > 確認コマンド: `git status --short`（private が出なければ正常）/ `chezmoi managed | grep private`（出れば chezmoi 管理下）
 
-> `private/` は chezmoi の `private_` 属性 prefix（パーミッション 0600）とは**別物**。
-> あちらは underscore 付きのファイル名に付く属性で、ディレクトリ名 `private` は通常のディレクトリとして扱われる。
+> `private.md` は chezmoi の `private_` 属性 prefix（パーミッション 0600）とは**別物**。
+> あちらは underscore 付きのファイル名に付く属性で、通常の dotfiles として git 追跡したい。
+> そのため `!**/private_*` で除外から戻している。**この negate 行を消すと
+> `private_` 付きの dotfiles が静かに git 管理外になる**（秘匿漏洩ではなく逆方向の事故）。
+>
+> 確認コマンド: `git check-ignore -v --no-index <パス>`（どのルールが効いたか分かる）
 
 ### 新しくドキュメントを追加するときの判断
 
