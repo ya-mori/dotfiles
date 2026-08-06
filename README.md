@@ -164,7 +164,7 @@ chezmoi apply
 | 層 | 中身 | 置き場 | git |
 |---|------|--------|-----|
 | **L1: 公開可** | 仕組み・ルール・構造。汎用的な知恵 | このリポジトリ | ✅ 管理する |
-| **L2: 秘匿** | 識別子・社内固有名詞・実名・社内制度・業務実例 | `private/` ディレクトリ | ❌ 管理外 |
+| **L2: 秘匿** | 識別子・社内固有名詞・実名・社内制度・業務実例 | `private/` ディレクトリ（**chezmoi は管理する**） | ❌ 追跡しない |
 | **L3: 認証情報** | PAT・API キー | macOS Keychain / `*.local` ファイル | ❌ 置かない |
 
 L3 の詳細は次節「秘匿情報の管理」を参照。
@@ -176,8 +176,15 @@ L2 を切り出すときは、**public 側と同じファイル名**で `private
 ```
 ~/.ai_agent/docs/
 ├── public/task-system.md    # 仕組み・ルール本体（このリポジトリで管理）
-└── private/task-system.md   # 識別子・実例だけの差分（git 管理外）
+└── private/task-system.md   # 識別子・実例だけの差分（chezmoi 管理・git 追跡なし）
 ```
+
+**private も chezmoi のソースに置く。** `dot_ai_agent/docs/private/` に実体があり、`chezmoi apply` で
+`~/.ai_agent/docs/private/` へ展開される。`.gitignore` によって git だけが追跡しない状態になっている。
+`chezmoi edit` で public 側と同じ操作で編集でき、置き場が分散しない。
+
+> **履歴は残らない。** git 管理外のため、うっかり上書きしても戻せない。
+> 実体はソースとターゲットの2箇所にあるので片方からは復旧できるが、変更履歴は追えない。
 
 - **private 側は本文を複製しない。** 秘匿部分の差分だけを持つ
 - AI エージェントは `public/X.md` を読んだら `private/X.md` の有無を確認し、あれば併せて読む（規約は `dot_ai_agent/instructions/core.md` の Document Reference Guidelines に定義）
@@ -189,7 +196,11 @@ L2 を切り出すときは、**public 側と同じファイル名**で `private
 | 仕組み | ファイル | 効果 |
 |--------|---------|------|
 | git 除外 | `.gitignore` の `**/private/` | 階層を問わず private/ をコミットさせない |
-| chezmoi 除外 | `.chezmoiignore` の `**/private/**` | 誤って `chezmoi add` してもターゲットへ展開しない |
+
+> ⚠️ **安全網はこの1本しかない。** `private/` は chezmoi の管理対象なので、
+> `.gitignore` のこの行を消すと秘匿情報が即座に git に入る。編集時は注意すること。
+>
+> 確認コマンド: `git status --short`（private が出なければ正常）/ `chezmoi managed | grep private`（出れば chezmoi 管理下）
 
 > `private/` は chezmoi の `private_` 属性 prefix（パーミッション 0600）とは**別物**。
 > あちらは underscore 付きのファイル名に付く属性で、ディレクトリ名 `private` は通常のディレクトリとして扱われる。
