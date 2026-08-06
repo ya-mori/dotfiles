@@ -16,13 +16,14 @@ Claude Code / Codex CLI の設定に加え、zsh・git・mise・自作スクリ�
 │   │       └── task-system.md    # Notion タスク管理の運用定義（秘匿部分は private 側へ分離）
 │   ├── instructions/
 │   │   └── core.md               # 全ツール共通ルール（Claude・Codex 両方に埋め込まれる）
-│   └── skills/                   # スキル実体7個（→ ~/.ai_agent/skills/）
+│   └── skills/                   # スキル実体8個（→ ~/.ai_agent/skills/）
 │       ├── ore-ai-review/        # Claude 専用（Codex には symlink しない）
 │       ├── ore-checkout/
 │       ├── ore-commit/
 │       ├── ore-message/
 │       ├── ore-plan-setup/
 │       ├── ore-push/
+│       ├── ore-slides/
 │       └── ore-think/
 ├── dot_claude/
 │   ├── CLAUDE.md.tmpl            # → ~/.claude/CLAUDE.md（core.md include + Claude 固有内容）
@@ -31,13 +32,13 @@ Claude Code / Codex CLI の設定に加え、zsh・git・mise・自作スクリ�
 │   │   └── codex-implementer.md  # → ~/.claude/agents/
 │   ├── hooks/
 │   │   └── executable_log-event.sh  # → ~/.claude/hooks/
-│   └── skills/                   # → ~/.claude/skills/（7個すべて symlink）
+│   └── skills/                   # → ~/.claude/skills/（8個すべて symlink）
 │       └── symlink_ore-*.tmpl    # ~/.ai_agent/skills/ へのシンボリックリンク
 ├── dot_codex/
 │   ├── AGENTS.md.tmpl            # → ~/.codex/AGENTS.md（core.md include + Codex 固有内容）
 │   ├── rules/
 │   │   └── default.rules.tmpl   # → ~/.codex/rules/default.rules
-│   └── skills/                   # → ~/.codex/skills/（symlink、6個）
+│   └── skills/                   # → ~/.codex/skills/（symlink、7個）
 │       └── symlink_*.tmpl        # ~/.ai_agent/skills/ へのシンボリックリンク
 ├── dot_zshenv                        # → ~/.zshenv（Keychain から秘匿トークンを注入）
 ├── dot_zshrc                         # → ~/.zshrc
@@ -77,7 +78,7 @@ Claude Code / Codex CLI の設定に加え、zsh・git・mise・自作スクリ�
 
 ### スキルの共有
 
-実体は `dot_ai_agent/skills/`（7個）で `~/.ai_agent/skills/` に展開される。Claude・Codex とも `symlink_*.tmpl` により `~/.ai_agent/skills/` を参照する対称構成。
+実体は `dot_ai_agent/skills/`（8個）で `~/.ai_agent/skills/` に展開される。Claude・Codex とも `symlink_*.tmpl` により `~/.ai_agent/skills/` を参照する対称構成。
 `ore-ai-review` は Claude のサブエージェント機構に依存するため Codex からは除外。
 
 ## 日常の運用
