@@ -1,2 +1,6 @@
 README.md
 Brewfile
+
+# private/ 配下は chezmoi の管理対象外（ローカル専用の秘匿ファイル置き場）。
+# 誤って chezmoi add してもターゲットへ展開されないようにする二重の安全網。
+**/private/**

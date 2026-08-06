@@ -11,6 +11,9 @@ Claude Code / Codex CLI の設定に加え、zsh・git・mise・自作スクリ�
 ├── .chezmoidata/
 │   └── permissions.yaml          # Bash 許可コマンドの単一定義
 ├── dot_ai_agent/
+│   ├── docs/
+│   │   └── public/               # → ~/.ai_agent/docs/public/（Claude・Codex 共通の参照ドキュメント）
+│   │       └── task-system.md    # Notion タスク管理の運用定義（秘匿部分は private 側へ分離）
 │   ├── instructions/
 │   │   └── core.md               # 全ツール共通ルール（Claude・Codex 両方に埋め込まれる）
 │   └── skills/                   # スキル実体7個（→ ~/.ai_agent/skills/）
@@ -86,6 +89,31 @@ chezmoi edit ~/.claude/CLAUDE.md
 chezmoi apply
 ```
 
+### 共通ルールへの昇格を判断する
+
+`CLAUDE.md.tmpl` / `AGENTS.md.tmpl` の**ツール固有セクション**にルールを追記・変更したら、
+そのつど `core.md` への昇格を検討し、`y/n` で確認を取る。
+
+固有ファイルに書いたルールが実は共通ルールだった、という取りこぼしを防ぐための手順。
+（実例: 「Notion タスク管理」は当初 CLAUDE.md 固有に書かれていたが、Codex でも使うため core へ昇格した）
+
+**判断フロー**
+
+1. **そのルールは、そのツール固有の機能に依存するか？**
+   （hook / サブエージェント / プラグイン / スラッシュコマンド / そのツールにしかない MCP 設定）
+   - **Yes → 固有のまま。** なぜ固有なのかを一言添えて報告する
+2. **もう一方のツールにも同じ振る舞いをしてほしいか？**
+   - **Yes → `core.md` へ昇格**することを `y/n` で確認する
+   - No → 固有のまま
+
+**棚卸しの記録**（2026-08-07 実施）
+
+| セクション | 判定 | 根拠 |
+|---|---|---|
+| Subagent Usage Guidelines | 固有 | Codex はサブエージェント機構を持たず、AGENTS.md に「自身で直接実装する」逆のルールがある |
+| Self-Improvement Loop | 固有 | Claude Code の `PostToolUse` hook に依存 |
+| Codex 実装委譲ルール | 固有 | Claude が Codex へ委譲する側のルール |
+
 ### 許可コマンドを追加する
 
 ```bash
@@ -127,9 +155,55 @@ chezmoi apply
 
 ツールが `~/.zshrc` に自動追記した場合は `chezmoi diff` で検知できる。必要な行は `~/.zshrc.local` に移し、`chezmoi apply` で `.zshrc` をクリーンな状態に戻す。
 
+## 公開方針（L1 / L2 / L3）
+
+**このリポジトリは public であっても差し支えない状態を保つ。**
+そのために情報を3層に分け、層ごとに置き場を変える。
+
+| 層 | 中身 | 置き場 | git |
+|---|------|--------|-----|
+| **L1: 公開可** | 仕組み・ルール・構造。汎用的な知恵 | このリポジトリ | ✅ 管理する |
+| **L2: 秘匿** | 識別子・社内固有名詞・実名・社内制度・業務実例 | `private/` ディレクトリ | ❌ 管理外 |
+| **L3: 認証情報** | PAT・API キー | macOS Keychain / `*.local` ファイル | ❌ 置かない |
+
+L3 の詳細は次節「秘匿情報の管理」を参照。
+
+### public / private 同名ペア規約
+
+L2 を切り出すときは、**public 側と同じファイル名**で `private/` に置く。
+
+```
+~/.ai_agent/docs/
+├── public/task-system.md    # 仕組み・ルール本体（このリポジトリで管理）
+└── private/task-system.md   # 識別子・実例だけの差分（git 管理外）
+```
+
+- **private 側は本文を複製しない。** 秘匿部分の差分だけを持つ
+- AI エージェントは `public/X.md` を読んだら `private/X.md` の有無を確認し、あれば併せて読む（規約は `dot_ai_agent/instructions/core.md` の Document Reference Guidelines に定義）
+- **private が無い環境でも public 側だけで動作すること。** 新マシンや他人の環境で壊れないようにする
+- 記述が競合する場合は private 側を優先する
+
+### 安全網
+
+| 仕組み | ファイル | 効果 |
+|--------|---------|------|
+| git 除外 | `.gitignore` の `**/private/` | 階層を問わず private/ をコミットさせない |
+| chezmoi 除外 | `.chezmoiignore` の `**/private/**` | 誤って `chezmoi add` してもターゲットへ展開しない |
+
+> `private/` は chezmoi の `private_` 属性 prefix（パーミッション 0600）とは**別物**。
+> あちらは underscore 付きのファイル名に付く属性で、ディレクトリ名 `private` は通常のディレクトリとして扱われる。
+
+### 新しくドキュメントを追加するときの判断
+
+1. 識別子（UUID・DB id・トークン）を含むか → **含むなら private へ**
+2. 社内固有名詞（プロダクト名・施策名）・実名・社内制度を含むか → **含むなら private へ**
+3. どちらも無く、仕組みや汎用的な知恵であれば public へ
+
+迷ったら private に置く。後から public に上げるのは安全だが、逆は履歴に残る。
+
 ## 秘匿情報の管理
 
-GitHub の認証は用途ごとに分離し、シェルには一切 export しない（環境変数としての露出を避ける）。
+L3（認証情報）の扱い。GitHub の認証は用途ごとに分離し、シェルには一切 export しない（環境変数としての露出を避ける）。
 
 | 用途 | 認証の担い手 | 備考 |
 |------|-------------|------|
