@@ -10,50 +10,46 @@ Claude Code / Codex CLI の設定に加え、zsh・git・mise・自作スクリ�
 ~/.local/share/chezmoi/
 ├── .chezmoidata/
 │   └── permissions.yaml          # Bash 許可コマンドの単一定義
+├── .chezmoitemplates/
+│   └── claude/settings.json      # settings.json 本体（modify_settings.json から参照される）
+├── .chezmoiscripts/
+│   └── run_onchange_*.sh.tmpl    # apply 時に実行（ホームには展開しない）
+├── .chezmoiignore                # chezmoi の展開対象外（README・Brewfile・private/）
+├── .gitignore                    # git 管理対象外（private/）
 ├── dot_ai_agent/
 │   ├── docs/
 │   │   └── public/               # → ~/.ai_agent/docs/public/（Claude・Codex 共通の参照ドキュメント）
-│   │       └── task-system.md    # Notion タスク管理の運用定義（秘匿部分は private 側へ分離）
+│   │       └── *.md              # 秘匿部分は同名で private/ へ分離（「公開方針」参照）
 │   ├── instructions/
 │   │   └── core.md               # 全ツール共通ルール（Claude・Codex 両方に埋め込まれる）
-│   └── skills/                   # スキル実体8個（→ ~/.ai_agent/skills/）
-│       ├── ore-ai-review/        # Claude 専用（Codex には symlink しない）
-│       ├── ore-checkout/
-│       ├── ore-commit/
-│       ├── ore-message/
-│       ├── ore-plan-setup/
-│       ├── ore-push/
-│       ├── ore-slides/
-│       └── ore-think/
+│   └── skills/                   # スキル実体（→ ~/.ai_agent/skills/）
+│       └── ore-*/                # 1スキル1ディレクトリ（SKILL.md 必須）
 ├── dot_claude/
 │   ├── CLAUDE.md.tmpl            # → ~/.claude/CLAUDE.md（core.md include + Claude 固有内容）
-│   ├── settings.json.tmpl        # → ~/.claude/settings.json
+│   ├── modify_settings.json      # → ~/.claude/settings.json（ランタイム書き込みを保持してマージ）
 │   ├── agents/
-│   │   └── codex-implementer.md  # → ~/.claude/agents/
+│   │   └── *.md                  # → ~/.claude/agents/（サブエージェント定義）
 │   ├── hooks/
-│   │   └── executable_log-event.sh  # → ~/.claude/hooks/
-│   └── skills/                   # → ~/.claude/skills/（8個すべて symlink）
+│   │   └── executable_*.sh       # → ~/.claude/hooks/
+│   └── skills/                   # → ~/.claude/skills/（全スキルを symlink）
 │       └── symlink_ore-*.tmpl    # ~/.ai_agent/skills/ へのシンボリックリンク
 ├── dot_codex/
 │   ├── AGENTS.md.tmpl            # → ~/.codex/AGENTS.md（core.md include + Codex 固有内容）
 │   ├── rules/
-│   │   └── default.rules.tmpl   # → ~/.codex/rules/default.rules
-│   └── skills/                   # → ~/.codex/skills/（symlink、7個）
+│   │   └── default.rules.tmpl    # → ~/.codex/rules/default.rules
+│   └── skills/                   # → ~/.codex/skills/（Codex 対象スキルのみ symlink）
 │       └── symlink_*.tmpl        # ~/.ai_agent/skills/ へのシンボリックリンク
-├── dot_zshenv                        # → ~/.zshenv（Keychain から秘匿トークンを注入）
-├── dot_zshrc                         # → ~/.zshrc
-├── dot_zprofile                      # → ~/.zprofile
+├── dot_zshenv                    # → ~/.zshenv（Keychain から秘匿トークンを注入）
+├── dot_zshrc                     # → ~/.zshrc
+├── dot_zprofile                  # → ~/.zprofile
 ├── dot_config/
 │   ├── git/
-│   │   └── ignore                   # → ~/.config/git/ignore
+│   │   └── ignore                # → ~/.config/git/ignore
 │   └── mise/
-│       └── config.toml              # → ~/.config/mise/config.toml
+│       └── config.toml           # → ~/.config/mise/config.toml
 ├── bin/
-│   ├── executable_gsopen.sh         # → ~/bin/gsopen.sh
-│   ├── executable_hello.sh          # → ~/bin/hello.sh
-│   └── executable_tmpdir.sh         # → ~/bin/tmpdir.sh
-├── Brewfile                          # brew パッケージの宣言（ホームには展開しない）
-├── run_onchange_after_brew-bundle.sh.tmpl  # Brewfile 変更時に brew bundle を実行
+│   └── executable_*.sh           # → ~/bin/*.sh（prefix が外れ実行権限が付く）
+├── Brewfile                      # brew パッケージの宣言（ホームには展開しない）
 └── README.md                     # このファイル（chezmoi 管理対象外）
 ```
 
@@ -78,8 +74,10 @@ Claude Code / Codex CLI の設定に加え、zsh・git・mise・自作スクリ�
 
 ### スキルの共有
 
-実体は `dot_ai_agent/skills/`（8個）で `~/.ai_agent/skills/` に展開される。Claude・Codex とも `symlink_*.tmpl` により `~/.ai_agent/skills/` を参照する対称構成。
+実体は `dot_ai_agent/skills/` で `~/.ai_agent/skills/` に展開される。Claude・Codex とも `symlink_*.tmpl` により `~/.ai_agent/skills/` を参照する対称構成。
 `ore-ai-review` は Claude のサブエージェント機構に依存するため Codex からは除外。
+
+現在のスキル一覧は `ls dot_ai_agent/skills/` で確認する（**README には列挙しない** ── 追加のたびに更新が必要になり、実態と乖離するため）。
 
 ## 日常の運用
 
@@ -138,6 +136,8 @@ printf '{{ .chezmoi.homeDir }}/.ai_agent/skills/<スキル名>\n' > dot_codex/sk
 
 chezmoi apply
 ```
+
+**README の更新は不要**（スキル一覧・個数を載せていないため）。
 
 ### ドリフト（アプリ側の書き換え）を検知・対処する
 
