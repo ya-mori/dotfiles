@@ -25,8 +25,10 @@
   - public 側 = 公開可能な仕組み・ルール本体。private 側 = 識別子・社内固有名詞・実名・社内制度などの**秘匿部分の差分のみ**（本文の複製はしない）
   - 記述が競合する場合は **private 側を優先する**
   - **private 側が無い環境でも public 側だけで動作すること**。private の存在を前提にした処理を書かない
-- `private/` 配下は git 管理外。**秘匿情報を public 側に書かない**
+- `private/` 配下は chezmoi が管理するが **git では追跡しない**。**秘匿情報を public 側に書かない**
   - 新しくドキュメントを作るときも、識別子・固有名詞は private 側へ切り出す
+- **人・チャンネル・組織を扱う作業の前に `~/.ai_agent/docs/public/team.md` を読む**（Slack 投稿、対外メッセージ作成、レビュー依頼など）
+  - 表に無いメンバー・チャンネル・GitHub ユーザーに接触したら、その場で private 側へ追記する（追記ルールは `team.md` に定義）
 
 ## Production Operation Guidelines
 
