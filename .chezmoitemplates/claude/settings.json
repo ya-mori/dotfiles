@@ -22,10 +22,7 @@
     "ask": [
       "Bash(git push:*)"
     ],
-    "defaultMode": "auto",
-    "additionalDirectories": [
-      "{{ .chezmoi.homeDir }}/.ai_workspace/claude/session-logs"
-    ]
+    "defaultMode": "auto"
   },
   "hooks": {
     "PermissionRequest": [
@@ -46,18 +43,6 @@
           {
             "type": "command",
             "command": "osascript -e 'display notification \"作業が完了しました。\" with title \"Claude Code\" sound name \"Glass\"'"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "~/.claude/hooks/log-event.sh",
-            "timeout": 5
           }
         ]
       }

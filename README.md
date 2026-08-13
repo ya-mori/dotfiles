@@ -30,8 +30,6 @@ Claude Code / Codex CLI の設定に加え、zsh・git・mise・自作スクリ�
 │   ├── modify_settings.json      # → ~/.claude/settings.json（ランタイム書き込みを保持してマージ）
 │   ├── agents/
 │   │   └── *.md                  # → ~/.claude/agents/（サブエージェント定義）
-│   ├── hooks/
-│   │   └── executable_*.sh       # → ~/.claude/hooks/
 │   └── skills/                   # → ~/.claude/skills/（全スキルを symlink）
 │       └── symlink_ore-*.tmpl    # ~/.ai_agent/skills/ へのシンボリックリンク
 ├── dot_codex/
@@ -111,8 +109,11 @@ chezmoi apply
 | セクション | 判定 | 根拠 |
 |---|---|---|
 | Subagent Usage Guidelines | 固有 | Codex はサブエージェント機構を持たず、AGENTS.md に「自身で直接実装する」逆のルールがある |
-| Self-Improvement Loop | 固有 | Claude Code の `PostToolUse` hook に依存 |
 | Codex 実装委譲ルール | 固有 | Claude が Codex へ委譲する側のルール |
+
+> Self-Improvement Loop（`PostToolUse` hook によるセッションログ収集）も固有と判定していたが、
+> **2026-08-13 に廃止した。** hook が 2026-07-08 の書き換え以降サイレントに停止しており、
+> 36日間気づかれなかったため。設計し直しは別タスクで扱う。
 
 ### 許可コマンドを追加する
 
