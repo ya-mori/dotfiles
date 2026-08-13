@@ -28,6 +28,16 @@
   - **private 側が無い環境でも public 側だけで動作すること**。private の存在を前提にした処理を書かない
 - `private` で始まるファイルは chezmoi が管理するが **git では追跡しない**。**秘匿情報を public 側に書かない**
   - 新しくドキュメントを作るときも、識別子・固有名詞は private 側へ切り出す
+- **`docs/` 配下を書き換えるときは chezmoi のソース側を編集する。** `~/.ai_agent/` を直接編集すると、次の `chezmoi apply` で消える
+  - private 側は git 追跡外で**履歴が無く、消えたら復旧できない**。public 側と違い取り返しがつかない
+  - 手順（パスは環境ごとに違うのでコマンドで解決する）:
+    ```bash
+    src=$(chezmoi source-path ~/.ai_agent/docs/{topic}/private.md)  # ソースの実体を得る
+    # $src を編集する
+    chezmoi apply ~/.ai_agent/docs/{topic}/private.md               # ターゲットへ反映
+    ```
+  - 先にターゲット側を編集してしまった場合は `chezmoi re-add ~/.ai_agent/docs/{topic}/private.md` で取り込む
+  - **chezmoi が無い環境（`command -v chezmoi` が空、または `source-path` が `not in destination directory` を返す）ではターゲットを直接編集してよい**
 - **人・チャンネル・組織を扱う作業の前に `~/.ai_agent/docs/team/public.md` を読む**（Slack 投稿、対外メッセージ作成、レビュー依頼など）
   - 表に無いメンバー・チャンネル・GitHub ユーザーに接触したら、その場で private 側へ追記する（追記ルールは `docs/team/public.md` に定義）
 

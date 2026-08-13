@@ -64,6 +64,8 @@
 
 追記のルール:
 
+- **書き込み先は chezmoi のソース側。** `~/.ai_agent/docs/team/private.md` を直接編集すると次の `chezmoi apply` で消える。
+  手順は `instructions/core.md` の Document Reference Guidelines を参照（`chezmoi source-path` でソースを解決する）
 - **埋められない列は空欄のままでよい。** 分かった時点で埋める
 - **推測で埋めない。** 特に `距離感` `参加範囲` `作法` は外すと失礼になるため、確信が持てなければ空欄にしてユーザーに確認する
 - **`距離感` は先回りして全員分を聞かない。`ore-message` でその人が実際に宛先になったときに確認して埋める。**
