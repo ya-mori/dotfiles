@@ -6,7 +6,7 @@ description: |
   と言われたら必ずこのスキルを使う。
   コミット済みの変更をリモートへ送る作業が必要な時は常にこのスキルを起動すること。
 version: 1.3.0
-allowed-tools: Bash(git branch:*), Bash(git log:*), Bash(git remote:*), Bash(git push:*), Bash(gh pr create:*), Bash(gh pr list:*), Bash(gh pr edit:*), Bash(gh pr view:*), Bash(gh repo view:*), Bash(ls .github:*), Bash(find .github:*), Bash(git diff:*), Bash(git merge-base:*), Bash(git rev-parse:*), Bash(rm -f .ai_workspace/claude/tmp/:*), Read(**), Write(**), TaskCreate, TaskUpdate, TaskList
+allowed-tools: Bash(git branch:*), Bash(git log:*), Bash(git remote:*), Bash(git push:*), Bash(gh pr create:*), Bash(gh pr list:*), Bash(gh pr edit:*), Bash(gh pr view:*), Bash(gh repo view:*), Bash(ls .github:*), Bash(find .github:*), Bash(git diff:*), Bash(git merge-base:*), Bash(git rev-parse:*), Bash(rm -f .ai_workspace/tmp/:*), Read(**), Write(**), TaskCreate, TaskUpdate, TaskList
 ---
 
 # スマートプッシュ実行
@@ -184,13 +184,13 @@ PR草稿を生成しました。内容を確認してください。
      - PR本文を一時ファイルに書き出す:
        ```
        # Write ツールで以下パスに PR 本文を作成:
-       .ai_workspace/claude/tmp/{yyyymmdd-HHMMSS}/pr_body.md
+       .ai_workspace/tmp/{yyyymmdd-HHMMSS}/pr_body.md
        ```
      - タイトルと本文を更新:
        ```bash
        gh pr edit {number} \
          --title "{承認済みタイトル}" \
-         --body-file .ai_workspace/claude/tmp/{yyyymmdd-HHMMSS}/pr_body.md
+         --body-file .ai_workspace/tmp/{yyyymmdd-HHMMSS}/pr_body.md
        ```
      - ドラフトに変更する場合は追加で:
        ```bash
@@ -198,7 +198,7 @@ PR草稿を生成しました。内容を確認してください。
        ```
      - 一時ファイルを削除:
        ```bash
-       rm -f .ai_workspace/claude/tmp/{yyyymmdd-HHMMSS}/pr_body.md
+       rm -f .ai_workspace/tmp/{yyyymmdd-HHMMSS}/pr_body.md
        ```
      - PR URLを取得して表示:
        ```bash
@@ -208,26 +208,26 @@ PR草稿を生成しました。内容を確認してください。
      - PR本文を一時ファイルに書き出す:
        ```
        # Write ツールで以下パスに PR 本文を作成:
-       .ai_workspace/claude/tmp/{yyyymmdd-HHMMSS}/pr_body.md
+       .ai_workspace/tmp/{yyyymmdd-HHMMSS}/pr_body.md
        ```
      - 通常PRの場合:
        ```bash
        gh pr create \
          --title "{承認済みタイトル}" \
-         --body-file .ai_workspace/claude/tmp/{yyyymmdd-HHMMSS}/pr_body.md \
+         --body-file .ai_workspace/tmp/{yyyymmdd-HHMMSS}/pr_body.md \
          --base {デフォルトブランチ名}
        ```
      - ドラフトPRの場合:
        ```bash
        gh pr create \
          --title "{承認済みタイトル}" \
-         --body-file .ai_workspace/claude/tmp/{yyyymmdd-HHMMSS}/pr_body.md \
+         --body-file .ai_workspace/tmp/{yyyymmdd-HHMMSS}/pr_body.md \
          --base {デフォルトブランチ名} \
          --draft
        ```
      - PR作成後、一時ファイルを削除:
        ```bash
-       rm -f .ai_workspace/claude/tmp/{yyyymmdd-HHMMSS}/pr_body.md
+       rm -f .ai_workspace/tmp/{yyyymmdd-HHMMSS}/pr_body.md
        ```
      - PR URLを取得:
        ```bash
@@ -254,6 +254,6 @@ PR草稿を生成しました。内容を確認してください。
 - ユーザーが承認する前にPRを作成・更新しない
 - GitHub CLI（gh）がない場合はPR作成をスキップし、pushのみ実行
 - 複数のPRテンプレートがある場合は最初に見つかったものを使用
-- PR本文の一時ファイルは必ず `.ai_workspace/claude/tmp/{yyyymmdd-HHMMSS}/` 以下に作成し、`tasks/` や `~/` には作成しない
+- PR本文の一時ファイルは必ず `.ai_workspace/tmp/{yyyymmdd-HHMMSS}/` 以下に作成し、`tasks/` や `~/` には作成しない
 
 **動作を開始します...**

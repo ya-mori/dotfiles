@@ -52,7 +52,7 @@ Claude の役割は正解を当てることではなく**鏡になること**。
 
 ## セットアップ（起動時に即実行）
 
-1. 記録ファイルを作成する: `.ai_workspace/claude/tasks/{yyyymmdd}-think/outline.md`
+1. 記録ファイルを作成する: `.ai_workspace/tasks/{yyyymmdd}-think/outline.md`
    - これが「生きたアウトライン」。会話のたびに更新する
    - 末尾に「パーキング」（ボツ・保留・惜しかった表現）と「出さない語」のセクションを持つ
 2. 報告は不要。最初の質問から始める:

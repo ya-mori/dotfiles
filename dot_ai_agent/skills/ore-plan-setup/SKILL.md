@@ -54,7 +54,7 @@ allowed-tools: Bash(date:*), Bash(mkdir:*), Bash(test:*), Bash(echo:*), Read(~/.
 
 ```bash
 DATE=$(date +%Y-%m-%d)
-mkdir -p .ai_workspace/claude/tasks/${DATE}-{タスク名}/
+mkdir -p .ai_workspace/tasks/${DATE}-{タスク名}/
 ```
 
 ### 5. ファイル作成（タイプ別）
