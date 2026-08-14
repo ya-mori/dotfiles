@@ -17,7 +17,6 @@ alias kctx=kubectx
 alias ll='ls -la'
 alias morning!='hello.sh'
 alias gsopen='gsopen.sh'
-alias tmpdir='tmpdir.sh'
 
 
 # Command Setup
