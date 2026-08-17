@@ -3,7 +3,7 @@
 # GitHub PAT はシェルには export しない。
 #   - git 操作: osxkeychain credential helper が担う
 #   - gh CLI: gh 自身の認証（gh auth login）が担う
-#   - Claude Code: ~/.claude/settings.json に Keychain から注入（keyring テンプレート）
+#   - Claude Code: gh CLI 経由で扱う（PAT は保持しない）
 # トークンを環境変数として全プロセスに晒さないことで露出面を減らす。
 
 # マシン固有の追加シークレットは管理外ファイルへ

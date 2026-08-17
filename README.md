@@ -234,39 +234,18 @@ L3（認証情報）の扱い。GitHub の認証は用途ごとに分離し、�
 |------|-------------|------|
 | git 操作（push/pull 等） | osxkeychain credential helper | `git config --global credential.helper osxkeychain` |
 | `gh` CLI | gh 自身の認証（`gh auth login`） | gh 専用の keyring にトークンを保持 |
-| Claude Code（GitHub 連携） | `~/.claude/settings.json` の env | `chezmoi apply` 時に `{{ keyring "github" .chezmoi.username }}` で PAT を注入 |
 
-Claude Code 用の PAT のみ macOS Keychain に保持する:
-
-| 項目 | 値 |
-|------|-----|
-| Keychain service | `github` |
-| Keychain account | ログインユーザー名（`$USER`） |
-
-### PAT のローテーション
-
-```bash
-# -w を値なしで実行するとプロンプトで安全に入力できる
-security add-generic-password -U -s github -a "$USER" -w
-chezmoi apply   # settings.json を再生成
-```
-
-注意: 生成後の `~/.claude/settings.json` には PAT が平文で含まれる（Claude Code の制約上不可避）。リポジトリと Keychain 以外にトークンを増やさないこと。
+Claude Code から GitHub を触るときも `gh` CLI 経由に統一する。GitHub MCP プラグインは使わないため、PAT を Keychain や `~/.claude/settings.json` に置かない（トークンの保管場所を増やさない）。
 
 ## 新マシンでのセットアップ
 
-1. Keychain へ PAT を登録する（必須・事前に実施）:
-   ```bash
-   security add-generic-password -s github -a "$USER" -w
-   ```
-
-2. git のユーザー情報を設定する:
+1. git のユーザー情報を設定する:
    ```bash
    git config --global user.name ya-mori
    git config --global user.email <メールアドレス>
    ```
 
-3. chezmoi をインストールして初期化する:
+2. chezmoi をインストールして初期化する:
    ```bash
    brew install chezmoi
    # リモートリポジトリが設定済みの場合
@@ -277,7 +256,7 @@ chezmoi apply   # settings.json を再生成
    `chezmoi apply` の中で `run_onchange_after_brew-bundle.sh` が実行され、Brewfile 記載のパッケージが自動インストールされる。
 
 補足:
-- `~/.zshenv.local` / `~/.zshrc.local` は必須ではない。GitHub PAT は Keychain から自動注入されるため、追加のシークレットやツール自動追記分が発生したときに手動作成すればよい。
+- `~/.zshenv.local` / `~/.zshrc.local` は必須ではない。追加のシークレットやツール自動追記分が発生したときに手動作成すればよい。
 
 ## 管理対象外のもの
 
@@ -290,7 +269,7 @@ chezmoi apply   # settings.json を再生成
 | `~/.claude/projects/` | ランタイム状態 |
 | `~/.claude/plugins/` | ランタイム状態 |
 | `README.md`（このファイル） | `.chezmoiignore` により管理対象外 |
-| `~/.zshenv.local` | GitHub PAT 以外の追加シークレット置き場（任意・平文をリポジトリに入れないため）。GitHub PAT は Keychain から注入されるためここには不要 |
+| `~/.zshenv.local` | 追加シークレット置き場（任意・平文をリポジトリに入れないため） |
 | `~/bin/cloud-sql-proxy` | バイナリのため（brew 等で導入する） |
 | `~/Brewfile` | Brewfile はソースリポジトリ内にのみ置き、`run_onchange` スクリプトに埋め込んで使う（ホームへは展開しない） |
 | `~/.gitconfig` | ユーザー情報（メールアドレス）と Sourcetree の自動生成設定を含むため管理しない。共通 ignore は ~/.config/git/ignore で管理 |
