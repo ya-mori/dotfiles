@@ -1,8 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
-    "GITHUB_PERSONAL_ACCESS_TOKEN": "{{ keyring "github" .chezmoi.username }}"
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "includeCoAuthoredBy": false,
   "permissions": {
@@ -71,7 +70,7 @@
     "example-skills@anthropic-agent-skills": false,
     "superpowers@claude-plugins-official": false,
     "code-review@claude-plugins-official": false,
-    "github@claude-plugins-official": true,
+    "github@claude-plugins-official": false,
     "claude-md-management@claude-plugins-official": false,
     "figma@claude-plugins-official": true,
     "skill-creator@claude-plugins-official": true,
