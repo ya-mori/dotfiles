@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# L2（識別子・社内固有名詞・実名・社内制度）が public 側のファイルへ混入するのを止める。
+#
+# このリポジトリは public。安全網は長らく .gitignore の `**/private*` 1本だけで、
+# それは「private という名前のファイル」を守るものでしかなかった。
+# public 側のファイルに L2 を書いてしまうケースは一切カバーされておらず、
+# 実際に 2026-08-18 に ore-task/SKILL.md と task-system/public.md へ
+# 実タスクの ID・プロダクト名・実名が入り、git filter-repo での履歴書き換えに至った。
+# このフックはその再発防止。詳細は README「公開方針（L1/L2/L3）」。
+#
+# 検出語は .githooks/private-l2-patterns にある（それ自体が L2 なので git 追跡外）。
+set -uo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+patterns="$repo_root/.githooks/private-l2-patterns"
+
+# パターンは L2 なので git に入らない。新マシンや他人の clone では存在しない。
+# そこで動かなくなるのは困るので、無ければ黙って通す（README「private が無い環境でも動く」）。
+if [ ! -f "$patterns" ]; then
+  printf 'note: %s が無いため L2 チェックをスキップしました\n' "${patterns#"$repo_root"/}" >&2
+  exit 0
+fi
+
+# staged な「追加行」だけを見る。
+# 削除行や既存行を見ると、L2 を消すコミット自体が弾かれて直せなくなる。
+# private* は追跡外なのでそもそも staged に現れない = public 側だけが対象になる。
+added="$(git diff --cached --unified=0 --no-color --diff-filter=d | grep '^+' | grep -v '^+++' || true)"
+[ -z "$added" ] && exit 0
+
+hits=""
+while IFS= read -r pat || [ -n "$pat" ]; do
+  case "$pat" in '' | '#'*) continue ;; esac
+  match="$(printf '%s\n' "$added" | grep -F -- "$pat" || true)"
+  [ -z "$match" ] && continue
+  hits="$hits
+  [$pat]
+$(printf '%s\n' "$match" | head -3 | sed 's/^/    /')"
+done <"$patterns"
+
+if [ -n "$hits" ]; then
+  cat >&2 <<EOF
+⛔ L2（秘匿）に該当する語が、staged な追加行に含まれています。
+
+このリポジトリは public です。実物は private.md 側に置き、
+public 側にはプレースホルダを書いてください（例: {ID prefix} / <repo> / プロダクトA / 媒体A）。
+対応表は docs/task-system/private.md にあります。
+$hits
+
+意図して通す場合のみ: git commit --no-verify
+EOF
+  exit 1
+fi
+
+exit 0
