@@ -6,3 +6,4 @@ cursor_workspace
 .ai_workspace
 .playwright-mcp
 **/.claude/settings.local.json
+.serena/
