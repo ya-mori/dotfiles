@@ -326,12 +326,17 @@ const getTextNodes = (root) => {
 };
 
 const getTextOffset = (root, targetNode, targetOffset) => {
-  let offset = 0;
-  for (const node of getTextNodes(root)) {
-    if (node === targetNode) return offset + targetOffset;
-    offset += node.nodeValue.length;
+  // Range.toString() は境界がテキストノードでも要素ノード（トリプルクリック選択等）でも
+  // 正しくテキスト長を返す。ノード同一性で走査する方式は要素境界で -1 を返し、
+  // コメントが無言で破棄されるバグがあった
+  const range = document.createRange();
+  range.selectNodeContents(root);
+  try {
+    range.setEnd(targetNode, targetOffset);
+  } catch {
+    return -1;
   }
-  return -1;
+  return range.toString().length;
 };
 
 const createRangeFromTextOffsets = (root, startOffset, endOffset) => {
