@@ -31,14 +31,17 @@ def main() -> None:
     # JSON 文字列内の "</" は "<\/" にエスケープし、script ブロックの強制終了を防ぐ
     markdown_json = json.dumps(source, ensure_ascii=False).replace("</", "<\\/")
 
+    output_path = pathlib.Path(args.output).resolve()
+
     result = (
         template
         .replace("__TITLE__", html.escape(title))
         .replace("__SOURCE_PATH__", html.escape(str(input_path)))
         .replace("__MARKDOWN_JSON__", markdown_json)
+        # 初回保存ダイアログでパスをクリップボードにコピーするため、自身の絶対パスを埋め込む
+        .replace('"__OUTPUT_PATH__"', json.dumps(str(output_path), ensure_ascii=False))
     )
 
-    output_path = pathlib.Path(args.output).resolve()
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(result, encoding="utf-8")
     print(output_path)

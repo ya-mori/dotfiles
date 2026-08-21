@@ -429,9 +429,22 @@ const verifyFilePermission = async (handle) => {
 };
 
 const expectedFileName = decodeURIComponent(location.pathname.split("/").pop() || "");
+// ビルド時に埋め込まれるこの HTML 自身の絶対パス（http 配信時は location から得られないため）
+const previewFilePath = "__OUTPUT_PATH__";
 
 const chooseHtmlFileHandle = async () => {
-  alert(`コメントをこの HTML 自身に保存します。\n次のダイアログで「${expectedFileName}」を選択してください。`);
+  let copied = false;
+  const pathForClipboard = previewFilePath.startsWith("__") ? "" : previewFilePath;
+  if (pathForClipboard) {
+    try {
+      await navigator.clipboard.writeText(pathForClipboard);
+      copied = true;
+    } catch { /* クリップボードに書けなくても続行 */ }
+  }
+  alert(
+    `コメントをこの HTML 自身に保存します。\n次のダイアログで「${expectedFileName}」を選択してください。` +
+    (copied ? `\n\nファイルパスはクリップボードにコピー済みです。\nダイアログで ⌘⇧G → ⌘V で貼り付けて移動できます。` : "")
+  );
   const [handle] = await window.showOpenFilePicker({
     types: [{ description: "HTML", accept: { "text/html": [".html", ".htm"] } }],
     multiple: false,
