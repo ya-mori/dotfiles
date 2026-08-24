@@ -1,0 +1,25 @@
+{
+  "evals": [
+    {
+      "name": "markdown-preview",
+      "prompt": "docs/proposal.mdをHTMLでプレビューしてブラウザで開いて。",
+      "expected_output": "指定Markdownからコメント可能なHTMLを一時ディレクトリに生成し、ブラウザで開く",
+      "expectations": [
+        "対象Markdownの存在を確認する",
+        "出力先を.ai_workspace/tmp配下にする",
+        "付属のbuild_preview.pyを利用する",
+        "生成したHTMLのパスを提示する"
+      ]
+    },
+    {
+      "name": "review-comment-readback",
+      "prompt": "プレビューHTMLに付いたコメントを読み取って元のMarkdownに反映して。",
+      "expected_output": "HTMLからコメントを取得し、対象Markdownへの反映内容を確認してから更新する",
+      "expectations": [
+        "付属のread_comments.pyを利用する",
+        "コメント対象と本文を確認する",
+        "元のMarkdownを直接上書きする前に内容を明示する"
+      ]
+    }
+  ]
+}

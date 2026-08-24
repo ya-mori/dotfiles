@@ -1,0 +1,25 @@
+{
+  "evals": [
+    {
+      "name": "default-branch-review",
+      "prompt": "developとの差分をレビューして。",
+      "expected_output": "develop/main/masterとの差分を取得し、リポジトリ全体の文脈を踏まえたレビュー結果を重要度付きで提示する",
+      "expectations": [
+        "デフォルトモードでベースブランチとの差分を確認する",
+        "変更箇所だけでなく関連するリポジトリ文脈を確認する",
+        "重大度または優先度付きで指摘を整理する",
+        "未確認の推測を事実として断定しない"
+      ]
+    },
+    {
+      "name": "uncommitted-diff-review",
+      "prompt": "/ore-ai-review --diff で未コミット変更をレビューして。",
+      "expected_output": "HEADとの差分だけを対象にレビューし、変更内容に対する具体的な指摘を提示する",
+      "expectations": [
+        "--diffモードを選択する",
+        "git diff HEADを対象にする",
+        "差分の範囲を超えた変更をレビュー対象に混ぜない"
+      ]
+    }
+  ]
+}

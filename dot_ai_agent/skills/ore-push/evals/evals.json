@@ -1,0 +1,26 @@
+{
+  "evals": [
+    {
+      "name": "push-and-pr",
+      "prompt": "コミット済みの変更をpushしてPRを作って。",
+      "expected_output": "ブランチと既存PRを確認し、PR本文を作成してユーザー承認後にpushとPR作成を行う",
+      "expectations": [
+        "main/masterへ直接pushしない",
+        "既存PRの有無を確認する",
+        "コミット履歴と差分からPR草稿を作る",
+        "push・PR作成前に承認を求める",
+        "作成後にURLと結果を提示する"
+      ]
+    },
+    {
+      "name": "existing-pr-safety",
+      "prompt": "このブランチの変更をPRにして。すでにPRがあるかもしれない。",
+      "expected_output": "既存PRを確認し、重複PRを作成せずに状態を報告する",
+      "expectations": [
+        "既存PRをstate allで検索する",
+        "既存PRがある場合は新規PR作成を中止する",
+        "既存PRの番号・タイトル・URLを提示する"
+      ]
+    }
+  ]
+}

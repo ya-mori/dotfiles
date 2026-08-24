@@ -1,0 +1,25 @@
+{
+  "evals": [
+    {
+      "name": "task-ledger-review",
+      "prompt": "タスク台帳を棚卸しして今の状況を教えて。",
+      "expected_output": "運用ルールとprivate側のDB情報を確認し、読み取り専用で棚卸し・進捗調査・候補抽出を行う",
+      "expectations": [
+        "task-systemのpublic.mdを読む",
+        "private.mdの有無を確認し、あれば読む",
+        "指定されたDB IDを使いnotion-searchでDBを探さない",
+        "変更案をまとめ、承認前にNotionを書き換えない"
+      ]
+    },
+    {
+      "name": "single-task-boundary",
+      "prompt": "これタスクにして。",
+      "expected_output": "定期棚卸しではなく単発操作として扱い、必要な情報を確認して起票手順へ案内する",
+      "expectations": [
+        "ore-taskの対象外であることを認識する",
+        "定期棚卸しを勝手に開始しない",
+        "単発操作のルールに従う"
+      ]
+    }
+  ]
+}
