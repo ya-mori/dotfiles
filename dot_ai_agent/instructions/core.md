@@ -54,6 +54,30 @@
 - **人・チャンネル・組織を扱う作業の前に `~/.ai_agent/docs/team/public.md` を読む**（Slack 投稿、対外メッセージ作成、レビュー依頼など）
   - 表に無いメンバー・チャンネル・GitHub ユーザーに接触したら、その場で private 側へ追記する（追記ルールは `docs/team/public.md` に定義）
 
+## Learning Capture Guidelines
+
+- **ユーザーの指摘・訂正を受けて行動を変えたら、その場で1ファイル書き出す**
+  - **Claude Code はネイティブの memory 機構がこれを兼ねる。**そちらに書けばよい（二重に書かない）
+  - **Codex はネイティブの蓄積先が無い**（`~/.codex/memories_1.sqlite` は空で、markdown の読み書き口も無い）。
+    必ず `~/.ai_workspace/memory/{kebab-case-slug}.md` に書く
+  - 書式は Claude の memory と揃える。**昇格スキルが両方を同じ形で読むため、ズレると片方が拾われなくなる**
+
+    ```markdown
+    ---
+    name: <kebab-case-slug>
+    description: <1行要約。関連性の判断に使う>
+    metadata:
+      type: user | feedback | project | reference
+    ---
+
+    <事実。feedback / project は **Why:** と **How to apply:** を続ける>
+    ```
+
+  - 既に同じ趣旨のファイルがあれば**新規作成せず、そのファイルを更新する**
+- **溜めた学びは `ore-improve` で恒久ルール（`core.md` / `CLAUDE.md` / `AGENTS.md` / skill / docs）へ昇格させる**
+  - **書きっぱなしにしない。**溜めるだけでは行動は変わらない
+  - 昇格したファイルには frontmatter に `promoted: <日付> <昇格先>` が入り、次回の抽出から外れる
+
 ## Production Operation Guidelines
 
 - **本番環境（prd）への操作は、必ず実行前に plan を提示して承認を得る**
