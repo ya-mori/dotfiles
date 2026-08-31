@@ -36,7 +36,10 @@ Claude Code / Codex CLI の設定に加え、zsh・git・mise・自作スクリ�
 │   ├── AGENTS.md.tmpl            # → ~/.codex/AGENTS.md（core.md include + Codex 固有内容）
 │   ├── rules/
 │   │   └── default.rules.tmpl    # → ~/.codex/rules/default.rules
-│   └── skills/                   # → ~/.codex/skills/（Codex 対象スキルのみ symlink）
+│   └── skills/                   # → ~/.codex/skills/（旧 Codex CLI 向け互換リンク）
+│       └── symlink_*.tmpl        # ~/.ai_agent/skills/ へのシンボリックリンク
+├── dot_agents/
+│   └── skills/                   # → ~/.agents/skills/（現行 Codex CLI の対象スキル）
 │       └── symlink_*.tmpl        # ~/.ai_agent/skills/ へのシンボリックリンク
 ├── dot_zshenv                    # → ~/.zshenv（Keychain から秘匿トークンを注入）
 ├── dot_zshrc                     # → ~/.zshrc
@@ -73,7 +76,7 @@ Claude Code / Codex CLI の設定に加え、zsh・git・mise・自作スクリ�
 
 ### スキルの共有
 
-実体は `dot_ai_agent/skills/` で `~/.ai_agent/skills/` に展開される。Claude・Codex とも `symlink_*.tmpl` により `~/.ai_agent/skills/` を参照する対称構成。
+実体は `dot_ai_agent/skills/` で `~/.ai_agent/skills/` に展開される。Claude と Codex はそれぞれの探索パスから `~/.ai_agent/skills/` へシンボリックリンクする。現行 Codex CLI のユーザースキルは `~/.agents/skills/`、旧バージョン互換として `~/.codex/skills/` も維持する。
 `ore-ai-review` は Claude のサブエージェント機構に依存するため Codex からは除外。
 
 現在のスキル一覧は `ls dot_ai_agent/skills/` で確認する（**README には列挙しない** ── 追加のたびに更新が必要になり、実態と乖離するため）。
@@ -161,7 +164,10 @@ $EDITOR dot_ai_agent/skills/<スキル名>/SKILL.md
 # Claude に追加する場合（symlink テンプレートを作成）
 printf '{{ .chezmoi.homeDir }}/.ai_agent/skills/<スキル名>\n' > dot_claude/skills/symlink_<スキル名>.tmpl
 
-# Codex にも共有する場合（Codex 用 symlink テンプレートも作成）
+# Codex にも共有する場合（現行 Codex 用 symlink テンプレートを作成）
+printf '{{ .chezmoi.homeDir }}/.ai_agent/skills/<スキル名>\n' > dot_agents/skills/symlink_<スキル名>.tmpl
+
+# 旧 Codex CLI とも共有する場合（互換用 symlink テンプレートを作成）
 printf '{{ .chezmoi.homeDir }}/.ai_agent/skills/<スキル名>\n' > dot_codex/skills/symlink_<スキル名>.tmpl
 
 chezmoi apply
