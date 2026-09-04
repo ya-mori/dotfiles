@@ -17,7 +17,7 @@ Claude から渡された仕様に基づき、Codex CLI を使って実装を行
 
 ## 設定
 
-- CODEX_CMD: `codex --ask-for-approval never --sandbox workspace-write`
+- CODEX_CMD: `codex --ask-for-approval never --sandbox workspace-write --add-dir ~/.ai_workspace`
 
 ## 実行手順
 
@@ -31,11 +31,12 @@ Claude から渡された仕様に基づき、Codex CLI を使って実装を行
 渡された仕様プロンプトをそのまま Codex に渡して実行する:
 
 ```bash
-codex --ask-for-approval never --sandbox workspace-write "{仕様プロンプト}"
+codex --ask-for-approval never --sandbox workspace-write --add-dir ~/.ai_workspace "{仕様プロンプト}"
 ```
 
 - `--ask-for-approval never`: 承認プロンプトなし（非インタラクティブ）
 - `--sandbox workspace-write`: 書き込みを作業ディレクトリ内に限定（公式CI/CD推奨構成）
+- `--add-dir ~/.ai_workspace`: 共有メモリ保存先への書き込みを許可
 - **Bash ツールの `timeout` パラメータに `300000`（5分）を明示的に指定すること**（デフォルトは 120 秒で、指定しないと実装途中で打ち切られる）
 - Codex の出力はそのまま保持する
 
@@ -68,4 +69,4 @@ CODEX_IMPL: ERROR
 
 - このエージェント自身はファイルを直接編集しない。ファイル変更は Codex に一任する
 - 仕様プロンプトは Claude が事前に整理・詳細化したものを受け取る前提
-- `--sandbox workspace-write` により、作業ディレクトリ外へのファイル書き込みは制限される
+- `--sandbox workspace-write` により、作業ディレクトリ外へのファイル書き込みは制限されるため、共有メモリを利用する場合は `--add-dir ~/.ai_workspace` を併用する
